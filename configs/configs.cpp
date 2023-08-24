@@ -284,6 +284,8 @@ void C_ConfigManager::setup()
 	setup_item(&g_cfg.esp.arms_animated_material_color, Color(255, 255, 255), crypt_str("Esp.arms_animated_material_color"));
 	setup_item(&g_cfg.esp.enable_weapon_chams, false, crypt_str("Esp.weapon_chams_enable"));
 	setup_item(&g_cfg.esp.weapon_chams, false, crypt_str("Esp.weapon_chams"));
+	setup_item(&g_cfg.esp.mask_models, false, crypt_str("Esp.mask_models"));
+	setup_item(&g_cfg.esp.EnableMaskChanger, false, crypt_str("Esp.EnableMaskChanger"));
 	setup_item(&g_cfg.esp.weapon_draw_original, true, crypt_str("Esp.weapon_draw_original"));
 	setup_item(&g_cfg.esp.weapon_chams_type, 0, crypt_str("Esp.weapon_chams_type"));
 	setup_item(&g_cfg.esp.weapon_chams_color, Color(255, 255, 255), crypt_str("Esp.weapon_chams_color"));
