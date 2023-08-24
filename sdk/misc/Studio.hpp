@@ -51,6 +51,7 @@ typedef float RadianEuler[3];
 #define HITGROUP_RIGHTARM 5
 #define HITGROUP_LEFTLEG 6
 #define HITGROUP_RIGHTLEG 7
+#define HITGROUP_NECK 8
 #define HITGROUP_GEAR 10
 
 enum modtype_t

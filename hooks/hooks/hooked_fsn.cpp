@@ -158,7 +158,7 @@ void __stdcall hooks::hooked_fsn(ClientFrameStage_t stage)
 		g_ctx.globals.updating_skins = false;
 	CUserCmd* m_pcmd = nullptr;
 	
-	misc::get().left_hand_knife(stage);
+	//misc::get().left_hand_knife(stage);
 	misc::get().fake_ping(stage);
 	misc::get().break_prediction(m_pcmd);
 	SkinChanger::run(stage);

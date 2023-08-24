@@ -25,6 +25,157 @@ void resolver::initialize_yaw(player_t* e, adjust_data* record)
 	player_record->middle = b_yaw(player, player->m_angEyeAngles().y, 3);
 }
 
+void resolver::reset()
+{
+	player = nullptr;
+	player_record = nullptr;
+
+	side = false;
+	fake = false;
+
+	was_first_bruteforce = false;
+	was_second_bruteforce = false;
+
+	original_goal_feet_yaw = 0.0f;
+	original_pitch = 0.0f;
+}
+
+bool resolver::IsAdjustingBalance()
+{
+	for (int i = 0; i < 15; i++)
+	{
+		const int activity = player->sequence_activity(player_record->layers[i].m_nSequence);
+		if (activity == 878)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool resolver::is_breaking_lby(AnimationLayer cur_layer, AnimationLayer prev_layer)
+{
+	if (IsAdjustingBalance())
+	{
+		if (IsAdjustingBalance())
+		{
+			if ((prev_layer.m_flCycle != cur_layer.m_flCycle) || cur_layer.m_flWeight == 1.f)
+			{
+				return true;
+			}
+			else if (cur_layer.m_flWeight == 0.f && (prev_layer.m_flCycle > 0.98f && cur_layer.m_flCycle > 0.98f))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	return false;
+}
+
+bool resolver::is_slow_walking()
+{
+	auto entity = player;
+	float large = 1;
+	float velocity_2D[64], old_velocity_2D[64];
+	if (entity->m_vecVelocity().Length2D() != velocity_2D[entity->EntIndex()] && entity->m_vecVelocity().Length2D() != NULL) {
+		old_velocity_2D[entity->EntIndex()] = velocity_2D[entity->EntIndex()];
+		velocity_2D[entity->EntIndex()] = entity->m_vecVelocity().Length2D();
+	}
+	if (large == 1) return false;
+	Vector velocity = entity->m_vecVelocity();
+	Vector direction = entity->m_angEyeAngles();
+
+	float speed = velocity.Length();
+	direction.y = entity->m_angEyeAngles().y - direction.y;
+
+	// Method 1
+	if (velocity_2D[entity->EntIndex()] > 1) {
+		int tick_counter[64];
+		if (velocity_2D[entity->EntIndex()] == old_velocity_2D[entity->EntIndex()])
+			tick_counter[entity->EntIndex()] += 1;
+		else
+			tick_counter[entity->EntIndex()] = 0;
+
+		while (tick_counter[entity->EntIndex()] > (1 / m_globals()->m_intervalpertick) * fabsf(0.2f))
+			return true;
+	}
+
+	return false;
+}
+int last_ticks[65];
+int resolver::GetChokedPackets() {
+	auto ticks = TIME_TO_TICKS(player->m_flSimulationTime() - player->m_flOldSimulationTime());
+	if (ticks == 0 && last_ticks[player->EntIndex()] > 0) {
+		return last_ticks[player->EntIndex()] - 1;
+	}
+	else {
+		last_ticks[player->EntIndex()] = ticks;
+		return ticks;
+	}
+}
+//void resolver::layer_test()
+//{
+//	player_record->type = LAYERS;
+//
+//	float center = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[0][6].m_flPlaybackRate)) * 1000.f;
+//	float positive_full = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[1][6].m_flPlaybackRate)) * 1000.f;
+//	float negative_full = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[2][6].m_flPlaybackRate)) * 1000.f;
+//	float positive_40 = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[3][6].m_flPlaybackRate)) * 1000.f;
+//	float negative_40 = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[4][6].m_flPlaybackRate)) * 1000.f;
+//
+//	if ((positive_full > center && negative_full <= center) || (positive_40 > center && negative_40 <= center))
+//		player_record->curSide = LEFT;
+//
+//
+//	else if ((negative_full > center && positive_full <= center) || (negative_40 > center && positive_40 <= center))
+//		player_record->curSide = RIGHT;
+//
+//	else
+//		get_side_trace();
+//
+//
+//}
+
+void resolver::get_side_trace()
+{
+	auto m_side = false;
+	auto trace = false;
+	if (m_globals()->m_curtime - lock_side > 2.0f)
+	{
+		auto first_visible = util::visible(g_ctx.globals.eye_pos, player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.first), player, g_ctx.local());
+		auto second_visible = util::visible(g_ctx.globals.eye_pos, player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.second), player, g_ctx.local());
+
+		if (first_visible != second_visible)
+		{
+			trace = true;
+			m_side = second_visible;
+			lock_side = m_globals()->m_curtime;
+		}
+		else
+		{
+			auto first_position = g_ctx.globals.eye_pos.DistTo(player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.first));
+			auto second_position = g_ctx.globals.eye_pos.DistTo(player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.second));
+
+			if (fabs(first_position - second_position) > 1.0f)
+				m_side = first_position > second_position;
+		}
+	}
+	else
+		trace = true;
+
+	if (m_side)
+	{
+		player_record->type = trace ? TRACE : DIRECTIONAL;
+		player_record->curSide = RIGHT;
+	}
+	else
+	{
+		player_record->type = trace ? TRACE : DIRECTIONAL;
+		player_record->curSide = LEFT;
+	}
+}
+
 float GetBackwardYaw(player_t* player)
 {
 	return math::calculate_angle(g_ctx.local()->GetAbsOrigin(), player->GetAbsOrigin()).y;
@@ -345,20 +496,20 @@ bool resolver::IsFakewalking(player_t* entity)
 //	original_pitch = math::normalize_pitch(pitch);
 //}
 
-void resolver::reset()
-{
-	player = nullptr;
-	player_record = nullptr;
-
-	side = false;
-	fake = false;
-
-	was_first_bruteforce = false;
-	was_second_bruteforce = false;
-
-	original_goal_feet_yaw = 0.0f;
-	original_pitch = 0.0f;
-}
+//void resolver::reset()
+//{
+//	player = nullptr;
+//	player_record = nullptr;
+//
+//	side = false;
+//	fake = false;
+//
+//	was_first_bruteforce = false;
+//	was_second_bruteforce = false;
+//
+//	original_goal_feet_yaw = 0.0f;
+//	original_pitch = 0.0f;
+//}
 
 bool CanSeeHitbox(player_t* entity, int HITBOX)
 {

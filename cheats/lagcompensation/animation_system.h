@@ -14,10 +14,11 @@ enum
 enum resolver_type
 {
 	ORIGINAL,
-	BRUTEFORCE,
+	LAYERS,
 	LBY,
 	TRACE,
-	DIRECTIONAL
+	DIRECTIONAL,
+	BRUTEFORCE
 };
 
 enum resolver_side
@@ -27,7 +28,45 @@ enum resolver_side
 	RESOLVER_FIRST,
 	RESOLVER_SECOND,
 	RESOLVER_LOW_FIRST,
-	RESOLVER_LOW_SECOND
+	RESOLVER_LOW_SECOND,
+	RESOLVER_LOW_FIRST_20,
+	RESOLVER_LOW_SECOND_20,
+	RESOLVER_ON_SHOT
+};
+
+enum modes
+{
+	AIR,
+	SLOW_WALKING,
+	MOVING,
+	STANDING,
+	FREESTANDING,
+	NO_MODE
+};
+
+enum get_side_move
+{
+	NO_SIDE,
+	LEFT,
+	RIGHT,
+};
+
+enum AnimationLayer_t
+{
+	ANIMATION_LAYER_AIMMATRIX = 0,
+	ANIMATION_LAYER_WEAPON_ACTION,
+	ANIMATION_LAYER_WEAPON_ACTION_RECROUCH,
+	ANIMATION_LAYER_ADJUST,
+	ANIMATION_LAYER_MOVEMENT_JUMP_OR_FALL,
+	ANIMATION_LAYER_MOVEMENT_LAND_OR_CLIMB,
+	ANIMATION_LAYER_MOVEMENT_MOVE,
+	ANIMATION_LAYER_MOVEMENT_STRAFECHANGE,
+	ANIMATION_LAYER_WHOLE_BODY,
+	ANIMATION_LAYER_FLASHED,
+	ANIMATION_LAYER_FLINCH,
+	ANIMATION_LAYER_ALIVELOOP,
+	ANIMATION_LAYER_LEAN,
+	ANIMATION_LAYER_COUNT
 };
 
 struct matrixes
@@ -36,6 +75,12 @@ struct matrixes
 	matrix3x4_t negative[MAXSTUDIOBONES];
 	matrix3x4_t zero[MAXSTUDIOBONES];
 	matrix3x4_t positive[MAXSTUDIOBONES];
+	matrix3x4_t first[MAXSTUDIOBONES];
+	matrix3x4_t second[MAXSTUDIOBONES];
+	matrix3x4_t low_first[MAXSTUDIOBONES];
+	matrix3x4_t low_second[MAXSTUDIOBONES];
+	matrix3x4_t low_first_20[MAXSTUDIOBONES];
+	matrix3x4_t low_second_20[MAXSTUDIOBONES];
 };
 
 class adjust_data;
@@ -65,17 +110,48 @@ public:
 	void initialize_yaw(player_t* e, adjust_data* record);
 	void reset();
 
+	bool IsAdjustingBalance();
+
+	bool is_breaking_lby(AnimationLayer cur_layer, AnimationLayer prev_layer);
+
+	void get_side_moving();
+
+	void check_low();
+
+	void layer_test();
+
+	void layer_detection();
+
+	bool low_delta();
+
 	void resolve_yaw();
 
 	bool Saw(player_t* entity);
 
 	bool is_slow_walking();
+
+	int GetChokedPackets();
+	void get_side_trace();
+
+	bool PitchAng();
+	
 	bool IsFakewalking(player_t* entity);
 	resolver_side FreeStand(player_t* e);
 	resolver_side TraceSide(player_t* e);
 	void NoSpreadResolver();
 	float resolve_pitch();
 	resolver_side last_side = RESOLVER_ORIGINAL;
+	
+	float matchshot();
+
+	AnimationLayer resolver_layers[7][15];
+	AnimationLayer previous_layer[15];
+	float resolver_goal_feet_yaw[7];
+
+	bool DesyncDetect();
+
+	void resolve();
+	void resolve_desync();
 
 	float b_yaw(player_t* player, float angle, int n);
 
@@ -92,6 +168,9 @@ public:
 
 	resolver_type type;
 	resolver_side side;
+	float desync_amount;
+	get_side_move curSide;
+	modes curMode;
 
 	bool invalid;
 	bool immune;

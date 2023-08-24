@@ -330,7 +330,7 @@ void C_ConfigManager::setup()
 	setup_item(&g_cfg.misc.jumpbug, key_bind(HOLD), crypt_str("Misc.jumpbug"));
 
 	setup_item(&g_cfg.misc.noduck, false, crypt_str("Misc.noduck"));
-	setup_item(&g_cfg.misc.left_knife, false, crypt_str("Misc.left_hand_knife"));
+	//setup_item(&g_cfg.misc.left_knife, false, crypt_str("Misc.left_hand_knife"));
 	setup_item(&g_cfg.misc.fakeduck_key, key_bind(TOGGLE), crypt_str("Misc.fakeduck_key"));
 	setup_item(&g_cfg.misc.fast_stop, false, crypt_str("Misc.fast_stop"));
 	setup_item(&g_cfg.misc.leg_movement, 2, crypt_str("Misc.leg_movement"));
