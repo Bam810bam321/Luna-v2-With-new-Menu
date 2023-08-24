@@ -17,6 +17,7 @@ const char* tracer_mode[] =
 
 const char* mask_changer_models[] =
 {
+	"None",
 	"Dallas",
 	"Battle Mask",
 	"Evil Clown",
