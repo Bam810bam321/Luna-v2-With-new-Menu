@@ -59,6 +59,7 @@ namespace hooks
 	extern vmthook* prediction_hook;
 	extern vmthook* trace_hook;
 	extern vmthook* filesystem_hook;
+        extern vmthook* player_hook;
 
 	extern C_HookedEvents hooked_events;
 

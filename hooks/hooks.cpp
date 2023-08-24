@@ -426,6 +426,7 @@ namespace hooks
 	vmthook* prediction_hook;
 	vmthook* trace_hook;
 	vmthook* filesystem_hook;
+        vmthook* player_hook;
 
 	C_HookedEvents hooked_events;
 }
