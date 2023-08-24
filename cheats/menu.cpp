@@ -1221,341 +1221,343 @@ void c_menu::render2(bool is_open)
 				}
 				break;
 				case visuals:
-                draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
+					draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
 
-                ImGui::SetCursorPos({ 57, 86 });
-                ImGui::BeginGroup(); {
-                    if (elements::subtab("Esp", subtab5 == a)) { subtab5 = a; }
-                    if (elements::subtab("World", subtab5 == b)) { subtab5 = b; }
-                } ImGui::EndGroup();
+					ImGui::SetCursorPos({ 57, 86 });
+					ImGui::BeginGroup(); {
+						if (elements::subtab("Esp", subtab5 == a)) { subtab5 = a; }
+						if (elements::subtab("World", subtab5 == b)) { subtab5 = b; }
+					} ImGui::EndGroup();
 
-                switch (subtab5) {
-                case a:
-                    ImGui::SetCursorPos({ 226, 16 });
-                    e_elements::begin_child("ESP", ImVec2(240, 300)); {
+					switch (subtab5) {
+					case a:
+						ImGui::SetCursorPos({ 226, 16 });
+						e_elements::begin_child("ESP", ImVec2(240, 300)); {
+							{
+
+								//tab_start();
+
+								ImGui::Checkbox(crypt_str("Enabled"), &g_cfg.player.enable);
+
+
+								if (player == 0 || ENEMY)
+								{
+									ImGui::Checkbox(crypt_str("OOF arrows"), &g_cfg.player.arrows);
+									ImGui::SameLine();
+									ImGui::ColorEdit(crypt_str("##arrowscolor"), &g_cfg.player.arrows_color, ALPHA);
+
+									if (g_cfg.player.arrows)
+									{
+										ImGui::SliderInt(crypt_str("Arrows distance"), &g_cfg.player.distance, 1, 100);
+										ImGui::SliderInt(crypt_str("Arrows size"), &g_cfg.player.size, 1, 100);
+									}
+								}
+
+								ImGui::Checkbox(crypt_str("Bounding box"), &g_cfg.player.type[player].box);
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##boxcolor"), &g_cfg.player.type[player].box_color, ALPHA);
+
+								ImGui::Checkbox(crypt_str("Name"), &g_cfg.player.type[player].name);
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##namecolor"), &g_cfg.player.type[player].name_color, ALPHA);
+
+								ImGui::Checkbox(crypt_str("Health bar"), &g_cfg.player.type[player].health);
+								ImGui::Checkbox(crypt_str("Health color"), &g_cfg.player.type[player].custom_health_color);
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##healthcolor"), &g_cfg.player.type[player].health_color, ALPHA);
+
+								for (auto i = 0, j = 0; i < ARRAYSIZE(flags); i++)
+								{
+									if (g_cfg.player.type[player].flags[i])
+									{
+										if (j)
+											preview += crypt_str(", ") + (std::string)flags[i];
+										else
+											preview = flags[i];
+
+										j++;
+									}
+								}
+
+								draw_multicombo(crypt_str("Flags"), g_cfg.player.type[player].flags, flags, ARRAYSIZE(flags), preview);
+								draw_multicombo(crypt_str("Weapon"), g_cfg.player.type[player].weapon, weaponplayer, ARRAYSIZE(weaponplayer), preview);
+
+
+								if (g_cfg.player.type[player].weapon[WEAPON_ICON] || g_cfg.player.type[player].weapon[WEAPON_TEXT])
+								{
+									ImGui::Text(crypt_str("Color "));
+									ImGui::SameLine();
+									ImGui::ColorEdit(crypt_str("##weapcolor"), &g_cfg.player.type[player].weapon_color, ALPHA);
+								}
+
+								ImGui::Checkbox(crypt_str("Skeleton"), &g_cfg.player.type[player].skeleton);
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##skeletoncolor"), &g_cfg.player.type[player].skeleton_color, ALPHA);
+
+								ImGui::Checkbox(crypt_str("Ammo bar"), &g_cfg.player.type[player].ammo);
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##ammocolor"), &g_cfg.player.type[player].ammobar_color, ALPHA);
+
+								ImGui::Checkbox(crypt_str("Foot steps"), &g_cfg.player.type[player].footsteps);
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##footstepscolor"), &g_cfg.player.type[player].footsteps_color, ALPHA);
+
+								if (g_cfg.player.type[player].footsteps)
+								{
+									ImGui::SliderInt(crypt_str("Thickness"), &g_cfg.player.type[player].thickness, 1, 10);
+									ImGui::SliderInt(crypt_str("Radius"), &g_cfg.player.type[player].radius, 50, 500);
+								}
+
+								if (player == 0 || ENEMY || player == 1 || TEAM)
+								{
+									ImGui::Checkbox(crypt_str("Tracers"), &g_cfg.player.type[player].snap_lines);
+									ImGui::SameLine();
+									ImGui::ColorEdit(crypt_str("##snapcolor"), &g_cfg.player.type[player].snap_lines_color, ALPHA);
+
+									if (player == 0)
+									{
+										ImGui::Checkbox(crypt_str("Hit matrix"), &g_cfg.player.lag_hitbox);
+										ImGui::SameLine();
+										ImGui::ColorEdit(crypt_str("##lagcompcolor"), &g_cfg.player.lag_hitbox_color, ALPHA);
+									}
+								}
+							}
+						}
+						e_elements::end_child();
+
+						ImGui::SetCursorPos({ 476, 16 });
+						e_elements::begin_child("Other", ImVec2(240, 240));
 						{
 
-							ImGui::Checkbox(crypt_str("Enabled"), &g_cfg.player.enable);
-						
+							ImGui::Checkbox(crypt_str("Grenade prediction"), &g_cfg.esp.grenade_prediction);
+							ImGui::SameLine();
+							ImGui::ColorEdit(crypt_str("##grenpredcolor"), &g_cfg.esp.grenade_prediction_color, ALPHA);
 
-							if (player == 0 || ENEMY)
+							if (g_cfg.esp.grenade_prediction)
 							{
-								ImGui::Checkbox(crypt_str("OOF arrows"), &g_cfg.player.arrows);
+								ImGui::Checkbox(crypt_str("On click"), &g_cfg.esp.on_click);
+								ImGui::Text(crypt_str("Tracer color "));
 								ImGui::SameLine();
-								ImGui::ColorEdit(crypt_str("##arrowscolor"), &g_cfg.player.arrows_color, ALPHA);
-
-								if (g_cfg.player.arrows)
-								{
-									ImGui::SliderInt(crypt_str("Arrows distance"), &g_cfg.player.distance, 1, 100);
-									ImGui::SliderInt(crypt_str("Arrows size"), &g_cfg.player.size, 1, 100);
-								}
+								ImGui::ColorEdit(crypt_str("##tracergrenpredcolor"), &g_cfg.esp.grenade_prediction_tracer_color, ALPHA);
 							}
 
-							ImGui::Checkbox(crypt_str("Bounding box"), &g_cfg.player.type[player].box);
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##boxcolor"), &g_cfg.player.type[player].box_color, ALPHA);
+							ImGui::Checkbox(crypt_str("Grenade projectiles"), &g_cfg.esp.projectiles);
 
-							ImGui::Checkbox(crypt_str("Name"), &g_cfg.player.type[player].name);
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##namecolor"), &g_cfg.player.type[player].name_color, ALPHA);
+							if (g_cfg.esp.projectiles)
+								draw_multicombo(crypt_str("Grenade ESP"), g_cfg.esp.grenade_esp, proj_combo, ARRAYSIZE(proj_combo), preview);
 
-							ImGui::Checkbox(crypt_str("Health bar"), &g_cfg.player.type[player].health);
-							ImGui::Checkbox(crypt_str("Health color"), &g_cfg.player.type[player].custom_health_color);
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##healthcolor"), &g_cfg.player.type[player].health_color, ALPHA);
-
-							for (auto i = 0, j = 0; i < ARRAYSIZE(flags); i++)
-							{
-								if (g_cfg.player.type[player].flags[i])
-								{
-									if (j)
-										preview += crypt_str(", ") + (std::string)flags[i];
-									else
-										preview = flags[i];
-
-									j++;
-								}
-							}
-
-							draw_multicombo(crypt_str("Flags"), g_cfg.player.type[player].flags, flags, ARRAYSIZE(flags), preview);
-							draw_multicombo(crypt_str("Weapon"), g_cfg.player.type[player].weapon, weaponplayer, ARRAYSIZE(weaponplayer), preview);
-
-
-							if (g_cfg.player.type[player].weapon[WEAPON_ICON] || g_cfg.player.type[player].weapon[WEAPON_TEXT])
+							if (g_cfg.esp.grenade_esp[GRENADE_ICON] || g_cfg.esp.grenade_esp[GRENADE_TEXT])
 							{
 								ImGui::Text(crypt_str("Color "));
 								ImGui::SameLine();
-								ImGui::ColorEdit(crypt_str("##weapcolor"), &g_cfg.player.type[player].weapon_color, ALPHA);
+								ImGui::ColorEdit(crypt_str("##projectcolor"), &g_cfg.esp.projectiles_color, ALPHA);
 							}
 
-							ImGui::Checkbox(crypt_str("Skeleton"), &g_cfg.player.type[player].skeleton);
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##skeletoncolor"), &g_cfg.player.type[player].skeleton_color, ALPHA);
-
-							ImGui::Checkbox(crypt_str("Ammo bar"), &g_cfg.player.type[player].ammo);
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##ammocolor"), &g_cfg.player.type[player].ammobar_color, ALPHA);
-
-							ImGui::Checkbox(crypt_str("Foot steps"), &g_cfg.player.type[player].footsteps);
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##footstepscolor"), &g_cfg.player.type[player].footsteps_color, ALPHA);
-
-							if (g_cfg.player.type[player].footsteps)
+							if (g_cfg.esp.grenade_esp[GRENADE_BOX])
 							{
-								ImGui::SliderInt(crypt_str("Thickness"), &g_cfg.player.type[player].thickness, 1, 10);
-								ImGui::SliderInt(crypt_str("Radius"), &g_cfg.player.type[player].radius, 50, 500);
-							}
-
-							if (player == 0 || ENEMY || player == 1 || TEAM)
-							{
-								ImGui::Checkbox(crypt_str("Tracers"), &g_cfg.player.type[player].snap_lines);
+								ImGui::Text(crypt_str("Box color "));
 								ImGui::SameLine();
-								ImGui::ColorEdit(crypt_str("##snapcolor"), &g_cfg.player.type[player].snap_lines_color, ALPHA);
-
-								if (player == 0)
-								{
-									ImGui::Checkbox(crypt_str("Hit matrix"), &g_cfg.player.lag_hitbox);
-									ImGui::SameLine();
-									ImGui::ColorEdit(crypt_str("##lagcompcolor"), &g_cfg.player.lag_hitbox_color, ALPHA);
-								}
+								ImGui::ColorEdit(crypt_str("##grenade_box_color"), &g_cfg.esp.grenade_box_color, ALPHA);
 							}
-						}
-                    }
-                    e_elements::end_child();
 
-                    ImGui::SetCursorPos({ 476, 16 });
-                    e_elements::begin_child("Other", ImVec2(240, 240)); 
-					{
-
-						ImGui::Checkbox(crypt_str("Grenade prediction"), &g_cfg.esp.grenade_prediction);
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##grenpredcolor"), &g_cfg.esp.grenade_prediction_color, ALPHA);
-
-						if (g_cfg.esp.grenade_prediction)
-						{
-							ImGui::Checkbox(crypt_str("On click"), &g_cfg.esp.on_click);
-							ImGui::Text(crypt_str("Tracer color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##tracergrenpredcolor"), &g_cfg.esp.grenade_prediction_tracer_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("Grenade projectiles"), &g_cfg.esp.projectiles);
-
-						if (g_cfg.esp.projectiles)
-							draw_multicombo(crypt_str("Grenade ESP"), g_cfg.esp.grenade_esp, proj_combo, ARRAYSIZE(proj_combo), preview);
-
-						if (g_cfg.esp.grenade_esp[GRENADE_ICON] || g_cfg.esp.grenade_esp[GRENADE_TEXT])
-						{
-							ImGui::Text(crypt_str("Color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##projectcolor"), &g_cfg.esp.projectiles_color, ALPHA);
-						}
-
-						if (g_cfg.esp.grenade_esp[GRENADE_BOX])
-						{
-							ImGui::Text(crypt_str("Box color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##grenade_box_color"), &g_cfg.esp.grenade_box_color, ALPHA);
-						}
-
-						if (g_cfg.esp.grenade_esp[GRENADE_GLOW])
-						{
-							ImGui::Text(crypt_str("Glow color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##grenade_glow_color"), &g_cfg.esp.grenade_glow_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("Grenade warning"), &g_cfg.esp.grenade_proximity_warning);
-						if (g_cfg.esp.grenade_proximity_warning)
-						{
-							ImGui::SetCursorPosX(8);
-							ImGui::Text(crypt_str("Warning color"));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##grenade_color512342"), &g_cfg.esp.grenade_proximity_warning_progress_color, ALPHA);
-
-							ImGui::Combo(crypt_str("Tracer mode"), &g_cfg.esp.grenade_proximity_tracers_mode, tracer_mode, ARRAYSIZE(tracer_mode));
-
-							if (!g_cfg.esp.grenade_proximity_tracers_mode == 0)
+							if (g_cfg.esp.grenade_esp[GRENADE_GLOW])
 							{
-								if (g_cfg.esp.grenade_proximity_tracers_mode == 2)
-									ImGui::SliderInt(crypt_str("Tracer width"), &g_cfg.esp.proximity_tracers_width, 1, 10);
+								ImGui::Text(crypt_str("Glow color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##grenade_glow_color"), &g_cfg.esp.grenade_glow_color, ALPHA);
+							}
 
+							ImGui::Checkbox(crypt_str("Grenade warning"), &g_cfg.esp.grenade_proximity_warning);
+							if (g_cfg.esp.grenade_proximity_warning)
+							{
 								ImGui::SetCursorPosX(8);
-								ImGui::Text(crypt_str("Tracer color "));
-
+								ImGui::Text(crypt_str("Warning color"));
 								ImGui::SameLine();
-								ImGui::ColorEdit(crypt_str("##dhau8ca9xijda0"), &g_cfg.esp.grenade_proximity_tracers_colors, ALPHA);
+								ImGui::ColorEdit(crypt_str("##grenade_color512342"), &g_cfg.esp.grenade_proximity_warning_progress_color, ALPHA);
+
+								ImGui::Combo(crypt_str("Tracer mode"), &g_cfg.esp.grenade_proximity_tracers_mode, tracer_mode, ARRAYSIZE(tracer_mode));
+
+								if (!g_cfg.esp.grenade_proximity_tracers_mode == 0)
+								{
+									if (g_cfg.esp.grenade_proximity_tracers_mode == 2)
+										ImGui::SliderInt(crypt_str("Tracer width"), &g_cfg.esp.proximity_tracers_width, 1, 10);
+
+									ImGui::SetCursorPosX(8);
+									ImGui::Text(crypt_str("Tracer color "));
+
+									ImGui::SameLine();
+									ImGui::ColorEdit(crypt_str("##dhau8ca9xijda0"), &g_cfg.esp.grenade_proximity_tracers_colors, ALPHA);
+								}
+
+								ImGui::Checkbox(crypt_str("Offscreen warning"), &g_cfg.esp.offscreen_proximity);
+
 							}
 
-							ImGui::Checkbox(crypt_str("Offscreen warning"), &g_cfg.esp.offscreen_proximity);
-
-						}
-
-						ImGui::Checkbox("Molotov timer", &g_cfg.esp.molotov_timer);
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##molotovtimer_color"), &g_cfg.esp.molotov_timer_color, ALPHA);
-						ImGui::Checkbox("Smoke timer", &g_cfg.esp.smoke_timer);
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##smoketimer_color"), &g_cfg.esp.smoke_timer_color, ALPHA);
-
-						ImGui::Checkbox(crypt_str("Bomb indicator"), &g_cfg.esp.bomb_timer);
-						draw_multicombo(crypt_str("Weapon ESP"), g_cfg.esp.weapon, weaponesp, ARRAYSIZE(weaponesp), preview);
-
-						if (g_cfg.esp.weapon[WEAPON_ICON] || g_cfg.esp.weapon[WEAPON_TEXT] || g_cfg.esp.weapon[WEAPON_DISTANCE])
-						{
-							ImGui::Text(crypt_str("Color "));
+							ImGui::Checkbox("Molotov timer", &g_cfg.esp.molotov_timer);
 							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##weaponcolor"), &g_cfg.esp.weapon_color, ALPHA);
-						}
-
-						if (g_cfg.esp.weapon[WEAPON_BOX])
-						{
-							ImGui::Text(crypt_str("Box color "));
+							ImGui::ColorEdit(crypt_str("##molotovtimer_color"), &g_cfg.esp.molotov_timer_color, ALPHA);
+							ImGui::Checkbox("Smoke timer", &g_cfg.esp.smoke_timer);
 							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##weaponboxcolor"), &g_cfg.esp.box_color, ALPHA);
-						}
+							ImGui::ColorEdit(crypt_str("##smoketimer_color"), &g_cfg.esp.smoke_timer_color, ALPHA);
 
-						if (g_cfg.esp.weapon[WEAPON_GLOW])
-						{
-							ImGui::Text(crypt_str("Glow color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##weaponglowcolor"), &g_cfg.esp.weapon_glow_color, ALPHA);
-						}
+							ImGui::Checkbox(crypt_str("Bomb indicator"), &g_cfg.esp.bomb_timer);
+							draw_multicombo(crypt_str("Weapon ESP"), g_cfg.esp.weapon, weaponesp, ARRAYSIZE(weaponesp), preview);
 
-						if (g_cfg.esp.weapon[WEAPON_AMMO])
-						{
-							ImGui::Text(crypt_str("Ammo bar color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##weaponammocolor"), &g_cfg.esp.weapon_ammo_color, ALPHA);
-						}
-					}
-                    e_elements::end_child();
-
-					ImGui::SetCursorPos({ 226, 332 });
-					e_elements::begin_child("Extra", ImVec2(240, 114)); 
-					{
-						draw_keybind(crypt_str("Third person"), &g_cfg.misc.thirdperson_toggle, crypt_str("##TPKEY__HOTKEY"));
-
-						ImGui::Checkbox(crypt_str("Third person when dead"), &g_cfg.misc.thirdperson_when_spectating);
-
-						if (g_cfg.misc.thirdperson_toggle.key > KEY_NONE && g_cfg.misc.thirdperson_toggle.key < KEY_MAX)
-							ImGui::SliderInt(crypt_str("Third person distance"), &g_cfg.misc.thirdperson_distance, 100, 300);
-
-						ImGui::SliderInt(crypt_str("Field of view"), &g_cfg.esp.fov, -80, 40);
-						ImGui::Checkbox(crypt_str("Taser range"), &g_cfg.esp.taser_range);
-						ImGui::Checkbox(crypt_str("Show spread"), &g_cfg.esp.show_spread);
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##spredcolor"), &g_cfg.esp.show_spread_color, ALPHA);
-						ImGui::Checkbox(crypt_str("Penetration crosshair"), &g_cfg.esp.penetration_reticle);
-
-						ImGui::SliderInt(crypt_str("Viewmodel field of view"), &g_cfg.esp.viewmodel_fov, -50, 40);
-						ImGui::SliderInt(crypt_str("Viewmodel X"), &g_cfg.esp.viewmodel_x, -50, 50);
-						ImGui::SliderInt(crypt_str("Viewmodel Y"), &g_cfg.esp.viewmodel_y, -50, 50);
-						ImGui::SliderInt(crypt_str("Viewmodel Z"), &g_cfg.esp.viewmodel_z, -50, 50);
-						ImGui::SliderInt(crypt_str("Viewmodel roll"), &g_cfg.esp.viewmodel_roll, -180, 180);
-					}
-					e_elements::end_child();
-
-                    ImGui::SetCursorPos({ 476, 272 });
-                    e_elements::begin_child("Glow", ImVec2(240, 174)); 
-					{
-
-						ImGui::Checkbox(crypt_str("Glow"), &g_cfg.player.type[player].glow);
-
-						if (g_cfg.player.type[player].glow)
-						{
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##glowcolor"), &g_cfg.player.type[player].glow_color, ALPHA);
-							ImGui::Combo(crypt_str("Glow type"), &g_cfg.player.type[player].glow_type, glowtype, ARRAYSIZE(glowtype));
-						}
-
-						draw_multicombo(crypt_str("Indicators"), g_cfg.esp.indicators, indicators, ARRAYSIZE(indicators), preview);
-						ImGui::Text("Left color");
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##indicatorsfirstcolor"), &g_cfg.esp.indicators_left_color, ALPHA);
-						ImGui::Text("Right color");
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##indicatorssecondcolor"), &g_cfg.esp.indicators_right_color, ALPHA);
-
-						draw_multicombo(crypt_str("Removals"), g_cfg.esp.removals, removals, ARRAYSIZE(removals), preview);
-
-						if (g_cfg.esp.removals[REMOVALS_ZOOM])
-							ImGui::Checkbox(crypt_str("Fix zoom sensivity"), &g_cfg.esp.fix_zoom_sensivity);
-
-
-
-						ImGui::Checkbox(crypt_str("Client bullet impacts"), &g_cfg.esp.client_bullet_impacts);
-
-						if (g_cfg.esp.client_bullet_impacts)
-						{
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##clientbulletimpacts"), &g_cfg.esp.client_bullet_impacts_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("Server bullet impacts"), &g_cfg.esp.server_bullet_impacts);
-
-						if (g_cfg.esp.server_bullet_impacts)
-						{
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##serverbulletimpacts"), &g_cfg.esp.server_bullet_impacts_color, ALPHA);
-						}
-
-						if (g_cfg.esp.client_bullet_impacts || g_cfg.esp.server_bullet_impacts)
-							ImGui::SliderFloat(crypt_str("Width"), &g_cfg.esp.bullet_impacts_width, 1, 20);
-
-						ImGui::Checkbox(crypt_str("Local bullet tracers"), &g_cfg.esp.bullet_tracer);
-						if (g_cfg.esp.bullet_tracer)
-						{
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##bulltracecolor"), &g_cfg.esp.bullet_tracer_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("Enemy bullet tracers"), &g_cfg.esp.enemy_bullet_tracer);
-
-						if (g_cfg.esp.enemy_bullet_tracer)
-						{
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##enemybulltracecolor"), &g_cfg.esp.enemy_bullet_tracer_color, ALPHA);
-						}
-
-						draw_multicombo(crypt_str("Hit marker"), g_cfg.esp.hitmarker, hitmarkers, ARRAYSIZE(hitmarkers), preview);
-
-						if (g_cfg.esp.hitmarker[1] or g_cfg.esp.hitmarker[2])
-						{
-							ImGui::Text("Hit marker color");
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##hitmarker_color"), &g_cfg.esp.hitmarker_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("Lighting hit marker"), &g_cfg.esp.lightingonshot);
-
-						ImGui::Checkbox(crypt_str("Damage marker"), &g_cfg.esp.damage_marker);
-
-						if (g_cfg.esp.damage_marker)
-						{
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##damage_marker_color"), &g_cfg.esp.damage_marker_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("Kill effect"), &g_cfg.esp.kill_effect);
-
-						if (g_cfg.esp.kill_effect)
-							ImGui::SliderFloat(crypt_str("Duration"), &g_cfg.esp.kill_effect_duration, 0.01f, 3.0f);
-
-						ImGui::Checkbox(crypt_str("Velocity graph"), &g_cfg.esp.velocity_graph);
-
-					}
-                    e_elements::end_child();
-                break;
-                case b:
-					ImGui::SetCursorPos({ 226, 16 });
-					e_elements::begin_child("Chams", ImVec2(240, 430)); {
-						{
-							if (player != LOCAL || !g_cfg.player.local_chams_type)
-								draw_multicombo(crypt_str("Chams"), g_cfg.player.type[player].chams, g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] ? chamsvisact : chamsvis, g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] ? ARRAYSIZE(chamsvisact) : ARRAYSIZE(chamsvis), preview);
-
-							if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] || player == LOCAL && g_cfg.player.local_chams_type) //-V648
+							if (g_cfg.esp.weapon[WEAPON_ICON] || g_cfg.esp.weapon[WEAPON_TEXT] || g_cfg.esp.weapon[WEAPON_DISTANCE])
 							{
+								ImGui::Text(crypt_str("Color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##weaponcolor"), &g_cfg.esp.weapon_color, ALPHA);
+							}
+
+							if (g_cfg.esp.weapon[WEAPON_BOX])
+							{
+								ImGui::Text(crypt_str("Box color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##weaponboxcolor"), &g_cfg.esp.box_color, ALPHA);
+							}
+
+							if (g_cfg.esp.weapon[WEAPON_GLOW])
+							{
+								ImGui::Text(crypt_str("Glow color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##weaponglowcolor"), &g_cfg.esp.weapon_glow_color, ALPHA);
+							}
+
+							if (g_cfg.esp.weapon[WEAPON_AMMO])
+							{
+								ImGui::Text(crypt_str("Ammo bar color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##weaponammocolor"), &g_cfg.esp.weapon_ammo_color, ALPHA);
+							}
+						}
+						e_elements::end_child();
+
+						ImGui::SetCursorPos({ 226, 332 });
+						e_elements::begin_child("Extra", ImVec2(240, 114));
+						{
+							draw_keybind(crypt_str("Third person"), &g_cfg.misc.thirdperson_toggle, crypt_str("##TPKEY__HOTKEY"));
+
+							ImGui::Checkbox(crypt_str("Third person when dead"), &g_cfg.misc.thirdperson_when_spectating);
+
+							if (g_cfg.misc.thirdperson_toggle.key > KEY_NONE && g_cfg.misc.thirdperson_toggle.key < KEY_MAX)
+								ImGui::SliderInt(crypt_str("Third person distance"), &g_cfg.misc.thirdperson_distance, 100, 300);
+
+							ImGui::SliderInt(crypt_str("Field of view"), &g_cfg.esp.fov, -80, 40);
+							ImGui::Checkbox(crypt_str("Taser range"), &g_cfg.esp.taser_range);
+							ImGui::Checkbox(crypt_str("Show spread"), &g_cfg.esp.show_spread);
+							ImGui::SameLine();
+							ImGui::ColorEdit(crypt_str("##spredcolor"), &g_cfg.esp.show_spread_color, ALPHA);
+							ImGui::Checkbox(crypt_str("Penetration crosshair"), &g_cfg.esp.penetration_reticle);
+
+							ImGui::SliderInt(crypt_str("Viewmodel field of view"), &g_cfg.esp.viewmodel_fov, -50, 40);
+							ImGui::SliderInt(crypt_str("Viewmodel X"), &g_cfg.esp.viewmodel_x, -50, 50);
+							ImGui::SliderInt(crypt_str("Viewmodel Y"), &g_cfg.esp.viewmodel_y, -50, 50);
+							ImGui::SliderInt(crypt_str("Viewmodel Z"), &g_cfg.esp.viewmodel_z, -50, 50);
+							ImGui::SliderInt(crypt_str("Viewmodel roll"), &g_cfg.esp.viewmodel_roll, -180, 180);
+						}
+						e_elements::end_child();
+
+						ImGui::SetCursorPos({ 476, 272 });
+						e_elements::begin_child("Glow", ImVec2(240, 174));
+						{
+
+							ImGui::Checkbox(crypt_str("Glow"), &g_cfg.player.type[player].glow);
+
+							if (g_cfg.player.type[player].glow)
+							{
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##glowcolor"), &g_cfg.player.type[player].glow_color, ALPHA);
+								ImGui::Combo(crypt_str("Glow type"), &g_cfg.player.type[player].glow_type, glowtype, ARRAYSIZE(glowtype));
+							}
+
+							draw_multicombo(crypt_str("Indicators"), g_cfg.esp.indicators, indicators, ARRAYSIZE(indicators), preview);
+							ImGui::Text("Left color");
+							ImGui::SameLine();
+							ImGui::ColorEdit(crypt_str("##indicatorsfirstcolor"), &g_cfg.esp.indicators_left_color, ALPHA);
+							ImGui::Text("Right color");
+							ImGui::SameLine();
+							ImGui::ColorEdit(crypt_str("##indicatorssecondcolor"), &g_cfg.esp.indicators_right_color, ALPHA);
+
+							draw_multicombo(crypt_str("Removals"), g_cfg.esp.removals, removals, ARRAYSIZE(removals), preview);
+
+							if (g_cfg.esp.removals[REMOVALS_ZOOM])
+								ImGui::Checkbox(crypt_str("Fix zoom sensivity"), &g_cfg.esp.fix_zoom_sensivity);
+
+
+
+							ImGui::Checkbox(crypt_str("Client bullet impacts"), &g_cfg.esp.client_bullet_impacts);
+
+							if (g_cfg.esp.client_bullet_impacts)
+							{
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##clientbulletimpacts"), &g_cfg.esp.client_bullet_impacts_color, ALPHA);
+							}
+
+							ImGui::Checkbox(crypt_str("Server bullet impacts"), &g_cfg.esp.server_bullet_impacts);
+
+							if (g_cfg.esp.server_bullet_impacts)
+							{
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##serverbulletimpacts"), &g_cfg.esp.server_bullet_impacts_color, ALPHA);
+							}
+
+							if (g_cfg.esp.client_bullet_impacts || g_cfg.esp.server_bullet_impacts)
+								ImGui::SliderFloat(crypt_str("Width"), &g_cfg.esp.bullet_impacts_width, 1, 20);
+
+							ImGui::Checkbox(crypt_str("Local bullet tracers"), &g_cfg.esp.bullet_tracer);
+							if (g_cfg.esp.bullet_tracer)
+							{
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##bulltracecolor"), &g_cfg.esp.bullet_tracer_color, ALPHA);
+							}
+
+							ImGui::Checkbox(crypt_str("Enemy bullet tracers"), &g_cfg.esp.enemy_bullet_tracer);
+
+							if (g_cfg.esp.enemy_bullet_tracer)
+							{
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##enemybulltracecolor"), &g_cfg.esp.enemy_bullet_tracer_color, ALPHA);
+							}
+
+							draw_multicombo(crypt_str("Hit marker"), g_cfg.esp.hitmarker, hitmarkers, ARRAYSIZE(hitmarkers), preview);
+
+							if (g_cfg.esp.hitmarker[1] or g_cfg.esp.hitmarker[2])
+							{
+								ImGui::Text("Hit marker color");
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##hitmarker_color"), &g_cfg.esp.hitmarker_color, ALPHA);
+							}
+
+							ImGui::Checkbox(crypt_str("Lighting hit marker"), &g_cfg.esp.lightingonshot);
+
+							ImGui::Checkbox(crypt_str("Damage marker"), &g_cfg.esp.damage_marker);
+
+							if (g_cfg.esp.damage_marker)
+							{
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##damage_marker_color"), &g_cfg.esp.damage_marker_color, ALPHA);
+							}
+
+							ImGui::Checkbox(crypt_str("Kill effect"), &g_cfg.esp.kill_effect);
+
+							if (g_cfg.esp.kill_effect)
+								ImGui::SliderFloat(crypt_str("Duration"), &g_cfg.esp.kill_effect_duration, 0.01f, 3.0f);
+
+							ImGui::Checkbox(crypt_str("Velocity graph"), &g_cfg.esp.velocity_graph);
+
+						}
+						e_elements::end_child();
+						break;
+					case b:
+						ImGui::SetCursorPos({ 226, 16 });
+						e_elements::begin_child("Chams", ImVec2(240, 430)); {
+							{
+								if (player != LOCAL || !g_cfg.player.local_chams_type)
+									draw_multicombo(crypt_str("Chams"), g_cfg.player.type[player].chams, g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] ? chamsvisact : chamsvis, g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] ? ARRAYSIZE(chamsvisact) : ARRAYSIZE(chamsvis), preview);
+
+								if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] || player == LOCAL && g_cfg.player.local_chams_type) //-V648
+								{
 									ImGui::Combo(crypt_str("Player chams material"), &g_cfg.player.type[player].chams_type, chamstype, ARRAYSIZE(chamstype));
 
 									if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE])
@@ -1589,79 +1591,80 @@ void c_menu::render2(bool is_open)
 											ImGui::ColorEdit(crypt_str("##backtrackcolor"), &g_cfg.player.backtrack_chams_color, ALPHA);
 										}
 									}
+								}
+
 							}
-
 						}
-					}
-					e_elements::end_child();
+						e_elements::end_child();
 
-					ImGui::SetCursorPos({ 476, 16 });
-					e_elements::begin_child("World", ImVec2(240, 430));
-					{
-
-						ImGui::Checkbox(crypt_str("Rain"), &g_cfg.esp.rain);
-						ImGui::Checkbox(crypt_str("Full bright"), &g_cfg.esp.bright);
-
-						ImGui::Combo(crypt_str("Skybox"), &g_cfg.esp.skybox, skybox, ARRAYSIZE(skybox));
-
-						ImGui::Text(crypt_str("Color "));
-						ImGui::SameLine();
-						ImGui::ColorEdit(crypt_str("##skyboxcolor"), &g_cfg.esp.skybox_color, NOALPHA);
-
-						if (g_cfg.esp.skybox == 21)
+						ImGui::SetCursorPos({ 476, 16 });
+						e_elements::begin_child("World", ImVec2(240, 430));
 						{
-							static char sky_custom[64] = "\0";
 
-							if (!g_cfg.esp.custom_skybox.empty())
-								strcpy_s(sky_custom, sizeof(sky_custom), g_cfg.esp.custom_skybox.c_str());
+							ImGui::Checkbox(crypt_str("Rain"), &g_cfg.esp.rain);
+							ImGui::Checkbox(crypt_str("Full bright"), &g_cfg.esp.bright);
 
-							ImGui::Text(crypt_str("Name"));
-							ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.f);
-
-							if (ImGui::InputText(crypt_str("##customsky"), sky_custom, sizeof(sky_custom)))
-								g_cfg.esp.custom_skybox = sky_custom;
-
-							ImGui::PopStyleVar();
-						}
-
-						ImGui::Checkbox(crypt_str("Color modulation"), &g_cfg.esp.nightmode);
-
-						if (g_cfg.esp.nightmode)
-						{
-							ImGui::Text(crypt_str("World color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##worldcolor"), &g_cfg.esp.world_color, ALPHA);
-
-							ImGui::Text(crypt_str("Props color "));
-							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##propscolor"), &g_cfg.esp.props_color, ALPHA);
-						}
-
-						ImGui::Checkbox(crypt_str("World modulation"), &g_cfg.esp.world_modulation);
-
-						if (g_cfg.esp.world_modulation)
-						{
-							ImGui::SliderFloat(crypt_str("Bloom"), &g_cfg.esp.bloom, 0.0f, 750.0f);
-							ImGui::SliderFloat(crypt_str("Exposure"), &g_cfg.esp.exposure, 0.0f, 2000.0f);
-							ImGui::SliderFloat(crypt_str("Ambient"), &g_cfg.esp.ambient, 0.0f, 1500.0f);
-						}
-
-						ImGui::Checkbox(crypt_str("Fog modulation"), &g_cfg.esp.fog);
-
-						if (g_cfg.esp.fog)
-						{
-							ImGui::SliderInt(crypt_str("Distance"), &g_cfg.esp.fog_distance, 0, 2500);
-							ImGui::SliderInt(crypt_str("Density"), &g_cfg.esp.fog_density, 0, 100);
+							ImGui::Combo(crypt_str("Skybox"), &g_cfg.esp.skybox, skybox, ARRAYSIZE(skybox));
 
 							ImGui::Text(crypt_str("Color "));
 							ImGui::SameLine();
-							ImGui::ColorEdit(crypt_str("##fogcolor"), &g_cfg.esp.fog_color, NOALPHA);
+							ImGui::ColorEdit(crypt_str("##skyboxcolor"), &g_cfg.esp.skybox_color, NOALPHA);
+
+							if (g_cfg.esp.skybox == 21)
+							{
+								static char sky_custom[64] = "\0";
+
+								if (!g_cfg.esp.custom_skybox.empty())
+									strcpy_s(sky_custom, sizeof(sky_custom), g_cfg.esp.custom_skybox.c_str());
+
+								ImGui::Text(crypt_str("Name"));
+								ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.f);
+
+								if (ImGui::InputText(crypt_str("##customsky"), sky_custom, sizeof(sky_custom)))
+									g_cfg.esp.custom_skybox = sky_custom;
+
+								ImGui::PopStyleVar();
+							}
+
+							ImGui::Checkbox(crypt_str("Color modulation"), &g_cfg.esp.nightmode);
+
+							if (g_cfg.esp.nightmode)
+							{
+								ImGui::Text(crypt_str("World color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##worldcolor"), &g_cfg.esp.world_color, ALPHA);
+
+								ImGui::Text(crypt_str("Props color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##propscolor"), &g_cfg.esp.props_color, ALPHA);
+							}
+
+							ImGui::Checkbox(crypt_str("World modulation"), &g_cfg.esp.world_modulation);
+
+							if (g_cfg.esp.world_modulation)
+							{
+								ImGui::SliderFloat(crypt_str("Bloom"), &g_cfg.esp.bloom, 0.0f, 750.0f);
+								ImGui::SliderFloat(crypt_str("Exposure"), &g_cfg.esp.exposure, 0.0f, 2000.0f);
+								ImGui::SliderFloat(crypt_str("Ambient"), &g_cfg.esp.ambient, 0.0f, 1500.0f);
+							}
+
+							ImGui::Checkbox(crypt_str("Fog modulation"), &g_cfg.esp.fog);
+
+							if (g_cfg.esp.fog)
+							{
+								ImGui::SliderInt(crypt_str("Distance"), &g_cfg.esp.fog_distance, 0, 2500);
+								ImGui::SliderInt(crypt_str("Density"), &g_cfg.esp.fog_density, 0, 100);
+
+								ImGui::Text(crypt_str("Color "));
+								ImGui::SameLine();
+								ImGui::ColorEdit(crypt_str("##fogcolor"), &g_cfg.esp.fog_color, NOALPHA);
+							}
 						}
+						e_elements::end_child();
+						break;
 					}
-					e_elements::end_child();
-                break;
-                }
-            break;
+					break;
+
 			case settings:
                 draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
 
