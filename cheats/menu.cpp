@@ -1363,9 +1363,9 @@ void c_menu::render2(bool is_open)
 						ImGui::Checkbox("Smoke timer", &g_cfg.esp.smoke_timer);
 						ImGui::SameLine();
 						ImGui::ColorEdit(crypt_str("##smoketimer_color"), &g_cfg.esp.smoke_timer_color, ALPHA);
-
 						ImGui::Checkbox(crypt_str("Bomb indicator"), &g_cfg.esp.bomb_timer);
-						draw_multicombo(crypt_str("Weapon ESP"), g_cfg.esp.weapon, weaponesp, ARRAYSIZE(weaponesp), preview);
+
+						//draw_multicombo(crypt_str("Weapon ESP"), g_cfg.esp.weapon, weaponesp, ARRAYSIZE(weaponesp), preview);
 
 						if (g_cfg.esp.weapon[WEAPON_ICON] || g_cfg.esp.weapon[WEAPON_TEXT] || g_cfg.esp.weapon[WEAPON_DISTANCE])
 						{
