@@ -199,6 +199,8 @@ void C_HookedEvents::FireGameEvent(IGameEvent* event)
 		auto attacker_id = m_engine()->GetPlayerForUserID(attacker); 
 		auto user_id = m_engine()->GetPlayerForUserID(user);
 
+		misc::get().KillEffect(event);
+
 		if (g_ctx.local()->is_alive() && attacker_id == m_engine()->GetLocalPlayer() && user_id != m_engine()->GetLocalPlayer())
 		{
 			auto entity = static_cast<player_t*>(m_entitylist()->GetClientEntity(user_id));

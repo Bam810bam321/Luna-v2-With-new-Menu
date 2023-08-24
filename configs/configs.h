@@ -614,6 +614,7 @@ struct Config
 		bool hitmarker_test;
 		Color hitmarker_color;
 		bool hitsound;
+		bool lightingonshot;
 		bool killsound;
 		bool damage_marker;
 		Color damage_marker_color;

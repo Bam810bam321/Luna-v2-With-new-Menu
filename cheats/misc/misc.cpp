@@ -657,6 +657,49 @@ void misc::FullBright()
 		mat_fullbright->SetValue(g_cfg.esp.bright);
 }
 
+void FX_Tesla(CTeslaInfo& pInfo)
+{
+	using FX_TeslaFn = void(__thiscall*)(CTeslaInfo&);
+	static FX_TeslaFn pEffects = (FX_TeslaFn)util::FindSignature("client.dll", "55 8B EC 81 EC ? ? ? ? 56 57 8B F9 8B 47 18");
+	if (!pEffects)
+		return;
+
+	pEffects(pInfo);
+}
+
+void misc::KillEffect(IGameEvent* pEvent)
+{
+	player_t* pEntity = (player_t*)m_entitylist()->GetClientEntity(m_engine()->GetPlayerForUserID(pEvent->GetInt(("userid"))));
+	player_t* pAttacker = (player_t*)m_entitylist()->GetClientEntity(m_engine()->GetPlayerForUserID(pEvent->GetInt(("attacker"))));
+
+	if (!g_cfg.esp.lightingonshot)
+		return;
+
+	if (pEntity == g_ctx.local())
+		return;
+
+	if (pEntity->EntIndex() <= 0 || pEntity->EntIndex() > 64)
+		return;
+
+	if (!pAttacker || !pEntity)
+		return;
+
+	if (pAttacker != g_ctx.local())
+		return;
+
+	CTeslaInfo teslaInfo;
+	teslaInfo.m_flBeamWidth = 10.f;
+	teslaInfo.m_flRadius = 500.f;
+	teslaInfo.m_nEntIndex = pEntity->EntIndex();
+	teslaInfo.m_vColor.Init(1.f, 1.f, 1.f);
+	teslaInfo.m_vPos = pEntity->hitbox_position(8);
+	teslaInfo.m_flTimeVisible = 0.75f;
+	teslaInfo.m_nBeams = 12;
+	teslaInfo.m_pszSpriteName = "sprites/physbeam.vmt";
+
+	FX_Tesla(teslaInfo);
+}
+
 void misc::PovArrows(player_t* e, Color color)
 {
 	auto isOnScreen = [](Vector origin, Vector& screen) -> bool

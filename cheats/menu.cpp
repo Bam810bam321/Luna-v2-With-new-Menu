@@ -1235,8 +1235,6 @@ void c_menu::render2(bool is_open)
                     e_elements::begin_child("ESP", ImVec2(240, 300)); {
 						{
 
-							//tab_start();
-
 							ImGui::Checkbox(crypt_str("Enabled"), &g_cfg.player.enable);
 						
 
@@ -1470,10 +1468,7 @@ void c_menu::render2(bool is_open)
 							ImGui::ColorEdit(crypt_str("##glowcolor"), &g_cfg.player.type[player].glow_color, ALPHA);
 							ImGui::Combo(crypt_str("Glow type"), &g_cfg.player.type[player].glow_type, glowtype, ARRAYSIZE(glowtype));
 						}
-						ImGui::Checkbox("indicators type", &g_cfg.esp.EnableIndicators);
-						{
-							draw_multicombo2(crypt_str("indicator style"), g_cfg.esp.indicators_type, indicators_styles, ARRAYSIZE(indicators_styles), preview);
-						}
+
 						draw_multicombo(crypt_str("Indicators"), g_cfg.esp.indicators, indicators, ARRAYSIZE(indicators), preview);
 						ImGui::Text("Left color");
 						ImGui::SameLine();
@@ -1532,7 +1527,7 @@ void c_menu::render2(bool is_open)
 							ImGui::ColorEdit(crypt_str("##hitmarker_color"), &g_cfg.esp.hitmarker_color, ALPHA);
 						}
 
-						//ImGui::Checkbox(crypt_str("Lighting hit marker"), &g_cfg.misc.lightingonshot);
+						ImGui::Checkbox(crypt_str("Lighting hit marker"), &g_cfg.esp.lightingonshot);
 
 						ImGui::Checkbox(crypt_str("Damage marker"), &g_cfg.esp.damage_marker);
 
