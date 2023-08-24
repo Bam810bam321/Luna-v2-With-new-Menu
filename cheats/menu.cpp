@@ -434,6 +434,40 @@ void draw_multicombo(std::string name, std::vector<int>& variable, const char* l
 	preview = crypt_str("None"); // reset preview to use later
 }
 
+void draw_multicombo2(std::string name, int* variable, const char* labels[], int count, std::string& preview)
+{
+	auto hashname = crypt_str("") + name; // we dont want to render name of combo
+
+	for (auto i = 0, j = 0; i < count; i++)
+	{
+		if (variable[i])
+		{
+			if (j)
+				preview += crypt_str(" ") + (std::string)labels[i];
+			else
+				preview = labels[i];
+
+			j++;
+		}
+	}
+
+	if (ImGui::BeginCombo(hashname.c_str(), preview.c_str())) // draw start
+	{
+		ImGui::BeginGroup();
+		{
+
+			for (auto i = 0; i < count; i++)
+				ImGui::Selectable(labels[i], (bool*)&variable[i], ImGuiSelectableFlags_DontClosePopups);
+
+		}
+		ImGui::EndGroup();
+
+		ImGui::EndCombo();
+	}
+
+	preview = crypt_str("None"); // reset preview to use later
+}
+
 bool LabelClick(const char* label, bool* v, const char* unique_id)
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -476,7 +510,7 @@ bool LabelClick(const char* label, bool* v, const char* unique_id)
 		*v = !(*v);
 
 	if (*v)
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(147 / 255.f, 190 / 255.f, 66 / 255.f, 1.f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(147/ 255.f, 190/ 255.f, 66/ 255.f, 1.f));
 	if (label_size.x > 0.0f)
 		ImGui::RenderText(ImVec2(check_bb.GetTL().x + 12, check_bb.GetTL().y), Buf);
 	if (*v)
@@ -650,15 +684,15 @@ void lua_edit(std::string window_name)
 	std::string file_path;
 
 	auto get_dir = [&]() -> void
-		{
-			static TCHAR path[MAX_PATH];
+	{
+		static TCHAR path[MAX_PATH];
 
-			if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, NULL, path)))
-				file_path = std::string(path) + crypt_str("C:\\Medusa.uno\\Scripts\\");
+		if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, NULL, path)))
+			file_path = std::string(path) + crypt_str("C:\\Medusa.uno\\Scripts\\");
 
-			CreateDirectory(file_path.c_str(), NULL);
-			file_path += window_name + crypt_str(".lua");
-		};
+		CreateDirectory(file_path.c_str(), NULL);
+		file_path += window_name + crypt_str(".lua");
+	};
 
 	get_dir();
 	const char* child_name = (window_name + window_name).c_str();
@@ -764,7 +798,7 @@ namespace ImGui
 			window->DrawList->AddRectFilled(bb.Min, bb.Max, ImColor(32.f / 255.f, 32.f / 255.f, 32.f / 255.f, 255.f / 255.f));
 
 		if (selected)
-			window->DrawList->AddRectFilled({ bb.Max.x,bb.Max.y }, { bb.Max.x - 3,bb.Min.y }, ImColor(147 / 255.f, 190 / 255.f, 66 / 255.f, 255.f / 255.f));
+			window->DrawList->AddRectFilled({ bb.Max.x,bb.Max.y }, { bb.Max.x - 3,bb.Min.y }, ImColor(147/ 255.f, 190/ 255.f, 66/ 255.f, 255.f / 255.f));
 
 		//ImGui::PushFont(c_menu::get().bigxd);
 		window->DrawList->AddText(ImVec2(bb.Min.x + 35, bb.Min.y + 13), ImColor(255 / 255.f, 255 / 255.f, 255 / 255.f, 255.f / 255.f), label);
@@ -773,7 +807,7 @@ namespace ImGui
 		window->DrawList->AddText(ImVec2(bb.Min.x + 35, bb.Min.y + 26), ImColor(100 / 255.f, 100 / 255.f, 100 / 255.f, 255.f / 255.f), desc);
 
 		ImGui::PushFont(c_menu::get().icons);
-		window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(icon).y / 2), ImColor(147 / 255.f, 190 / 255.f, 66 / 255.f, 255.f / 255.f), icon);
+		window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(icon).y / 2), ImColor(147/ 255.f, 190/ 255.f, 66/ 255.f, 255.f / 255.f), icon);
 		ImGui::PopFont();
 
 		return pressed;
@@ -827,19 +861,19 @@ namespace ImGui
 		// window->DrawList->AddRectFilledMultiColor(bb.Min, bb.Max, ImColor(24, 22, 29, 155), ImColor(24, 22, 29, 155), ImColor(24, 22, 29, 255), ImColor(24, 22, 29, 255));
 		if (active)
 		{
-			window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(147 / 255.f, 190 / 255.f, 66 / 255.f, 255.f / 255.f), label);
+			window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(147/ 255.f, 190/ 255.f, 66/ 255.f, 255.f / 255.f), label);
 			//	window->DrawList->AddRectFilledMultiColor(ImVec2(bb.Min.x, bb.Max.y - 3), ImVec2(bb.Min.x + (size_arg.x), bb.Max.y), ImColor(g_cfg.menu.menu_theme.r(), g_cfg.menu.menu_theme.g(), g_cfg.menu.menu_theme.b(), 15), ImColor(g_cfg.menu.menu_theme.r(), g_cfg.menu.menu_theme.g(), g_cfg.menu.menu_theme.b(), 15), ImColor(g_cfg.menu.menu_theme.r(), g_cfg.menu.menu_theme.g(), g_cfg.menu.menu_theme.b(), 125), ImColor(g_cfg.menu.menu_theme.r(), g_cfg.menu.menu_theme.g(), g_cfg.menu.menu_theme.b(), 125));
 			//	window->DrawList->AddRectFilled(ImVec2(bb.Min.x, bb.Max.y - 1), ImVec2(bb.Max.x, bb.Max.y), ImColor(g_cfg.menu.menu_theme.r() / 255.f, g_cfg.menu.menu_theme.g() / 255.f, g_cfg.menu.menu_theme.b() / 255.f, alpha));
 		}
 		else if (hovered)
 		{
-			window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(147 / 255.f, 190 / 255.f, 66 / 255.f, alpha), label);
+			window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(147/ 255.f, 190/ 255.f, 66/ 255.f, alpha), label);
 
 			//	window->DrawList->AddRectFilled(ImVec2(bb.Min.x, bb.Max.y - 1), ImVec2(bb.Max.x, bb.Max.y), ImColor(g_cfg.menu.menu_theme.r() / 255.f, g_cfg.menu.menu_theme.g() / 255.f, g_cfg.menu.menu_theme.b() / 255.f, alpha));
 		}
 		else if (active && pressed)
 		{
-			window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(147 / 255.f, 190 / 255.f, 66 / 255.f, 255.f / 255.f), label);
+			window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(147/ 255.f, 190/ 255.f, 66/ 255.f, 255.f / 255.f), label);
 
 			//	window->DrawList->AddRectFilled(ImVec2(bb.Min.x, bb.Max.y - 1), ImVec2(bb.Max.x, bb.Max.y), ImColor(g_cfg.menu.menu_theme.r() / 255.f, g_cfg.menu.menu_theme.g() / 255.f, g_cfg.menu.menu_theme.b() / 255.f, alpha));
 		}
@@ -888,7 +922,7 @@ namespace ImGui
 			window->DrawList->AddRectFilled({ bb.Min.x,bb.Min.y }, { bb.Max.x,bb.Max.y }, ImColor(32.f / 255.f, 32.f / 255.f, 32.f / 255.f, 255.f / 255.f));
 
 		if (selected)
-			window->DrawList->AddRectFilled({ bb.Max.x,bb.Max.y }, { bb.Max.x - 3,bb.Min.y }, ImColor(147 / 255.f, 190 / 255.f, 66 / 255.f, 255.f / 255.f));
+			window->DrawList->AddRectFilled({ bb.Max.x,bb.Max.y }, { bb.Max.x - 3,bb.Min.y }, ImColor(147/ 255.f, 190/ 255.f, 66/ 255.f, 255.f / 255.f));
 
 		//ImGui::PushFont(c_menu::get().bigxd);
 		window->DrawList->AddText(ImVec2(bb.Min.x + 5, bb.Min.y + size_arg.y / 2 - ImGui::CalcTextSize(label).y / 2), ImColor(255 / 255.f, 255 / 255.f, 255 / 255.f, 255.f / 255.f), label);
@@ -958,7 +992,7 @@ enum sub_heads4 {
 	antiaim3,
 };
 
-void c_menu::render2(bool is_open)
+void c_menu::render2(bool is_open) 
 {
 	if (is_open)
 	{
@@ -1186,25 +1220,23 @@ void c_menu::render2(bool is_open)
 					break;
 				}
 				break;
-			case visuals:
-				draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
+				case visuals:
+                draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
 
-				ImGui::SetCursorPos({ 57, 86 });
-				ImGui::BeginGroup(); {
-					if (elements::subtab("Esp", subtab5 == a)) { subtab5 = a; }
-					if (elements::subtab("World", subtab5 == b)) { subtab5 = b; }
-				} ImGui::EndGroup();
+                ImGui::SetCursorPos({ 57, 86 });
+                ImGui::BeginGroup(); {
+                    if (elements::subtab("Esp", subtab5 == a)) { subtab5 = a; }
+                    if (elements::subtab("World", subtab5 == b)) { subtab5 = b; }
+                } ImGui::EndGroup();
 
-				switch (subtab5) {
-				case a:
-					ImGui::SetCursorPos({ 226, 16 });
-					e_elements::begin_child("ESP", ImVec2(240, 300)); {
+                switch (subtab5) {
+                case a:
+                    ImGui::SetCursorPos({ 226, 16 });
+                    e_elements::begin_child("ESP", ImVec2(240, 300)); {
 						{
 
-							//tab_start();
-
 							ImGui::Checkbox(crypt_str("Enabled"), &g_cfg.player.enable);
-
+						
 
 							if (player == 0 || ENEMY)
 							{
@@ -1288,11 +1320,11 @@ void c_menu::render2(bool is_open)
 								}
 							}
 						}
-					}
-					e_elements::end_child();
+                    }
+                    e_elements::end_child();
 
-					ImGui::SetCursorPos({ 476, 16 });
-					e_elements::begin_child("Other", ImVec2(240, 240));
+                    ImGui::SetCursorPos({ 476, 16 });
+                    e_elements::begin_child("Other", ImVec2(240, 240)); 
 					{
 
 						ImGui::Checkbox(crypt_str("Grenade prediction"), &g_cfg.esp.grenade_prediction);
@@ -1397,10 +1429,10 @@ void c_menu::render2(bool is_open)
 							ImGui::ColorEdit(crypt_str("##weaponammocolor"), &g_cfg.esp.weapon_ammo_color, ALPHA);
 						}
 					}
-					e_elements::end_child();
+                    e_elements::end_child();
 
 					ImGui::SetCursorPos({ 226, 332 });
-					e_elements::begin_child("Extra", ImVec2(240, 114));
+					e_elements::begin_child("Extra", ImVec2(240, 114)); 
 					{
 						draw_keybind(crypt_str("Third person"), &g_cfg.misc.thirdperson_toggle, crypt_str("##TPKEY__HOTKEY"));
 
@@ -1424,8 +1456,8 @@ void c_menu::render2(bool is_open)
 					}
 					e_elements::end_child();
 
-					ImGui::SetCursorPos({ 476, 272 });
-					e_elements::begin_child("Glow", ImVec2(240, 174));
+                    ImGui::SetCursorPos({ 476, 272 });
+                    e_elements::begin_child("Glow", ImVec2(240, 174)); 
 					{
 
 						ImGui::Checkbox(crypt_str("Glow"), &g_cfg.player.type[player].glow);
@@ -1495,7 +1527,7 @@ void c_menu::render2(bool is_open)
 							ImGui::ColorEdit(crypt_str("##hitmarker_color"), &g_cfg.esp.hitmarker_color, ALPHA);
 						}
 
-						//ImGui::Checkbox(crypt_str("Lighting hit marker"), &g_cfg.misc.lightingonshot);
+						ImGui::Checkbox(crypt_str("Lighting hit marker"), &g_cfg.esp.lightingonshot);
 
 						ImGui::Checkbox(crypt_str("Damage marker"), &g_cfg.esp.damage_marker);
 
@@ -1513,9 +1545,9 @@ void c_menu::render2(bool is_open)
 						ImGui::Checkbox(crypt_str("Velocity graph"), &g_cfg.esp.velocity_graph);
 
 					}
-					e_elements::end_child();
-					break;
-				case b:
+                    e_elements::end_child();
+                break;
+                case b:
 					ImGui::SetCursorPos({ 226, 16 });
 					e_elements::begin_child("Chams", ImVec2(240, 430)); {
 						{
@@ -1524,39 +1556,39 @@ void c_menu::render2(bool is_open)
 
 							if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] || player == LOCAL && g_cfg.player.local_chams_type) //-V648
 							{
-								ImGui::Combo(crypt_str("Player chams material"), &g_cfg.player.type[player].chams_type, chamstype, ARRAYSIZE(chamstype));
+									ImGui::Combo(crypt_str("Player chams material"), &g_cfg.player.type[player].chams_type, chamstype, ARRAYSIZE(chamstype));
 
-								if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE])
-								{
-									ImGui::Text(crypt_str("Visible "));
-									ImGui::SameLine();
-									ImGui::ColorEdit(crypt_str("##chamsvisible"), &g_cfg.player.type[player].chams_color, ALPHA);
-								}
-
-								if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] && g_cfg.player.type[player].chams[PLAYER_CHAMS_INVISIBLE])
-								{
-									ImGui::Text(crypt_str("Invisible "));
-									ImGui::SameLine();
-									ImGui::ColorEdit(crypt_str("##chamsinvisible"), &g_cfg.player.type[player].xqz_color, ALPHA);
-								}
-
-								ImGui::Checkbox(crypt_str("Animated material"), &g_cfg.player.type[player].animated_material);
-								ImGui::SameLine();
-								ImGui::ColorEdit(crypt_str("##animcolormat"), &g_cfg.player.type[player].animated_material_color, ALPHA);
-
-								if (player == ENEMY)
-								{
-									ImGui::Checkbox(crypt_str("Shadow"), &g_cfg.player.backtrack_chams);
-
-									if (g_cfg.player.backtrack_chams)
+									if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE])
 									{
-										ImGui::Combo(crypt_str("Shadow material"), &g_cfg.player.backtrack_chams_material, chamstype, ARRAYSIZE(chamstype));
-
-										ImGui::Text(crypt_str("Color "));
+										ImGui::Text(crypt_str("Visible "));
 										ImGui::SameLine();
-										ImGui::ColorEdit(crypt_str("##backtrackcolor"), &g_cfg.player.backtrack_chams_color, ALPHA);
+										ImGui::ColorEdit(crypt_str("##chamsvisible"), &g_cfg.player.type[player].chams_color, ALPHA);
 									}
-								}
+
+									if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] && g_cfg.player.type[player].chams[PLAYER_CHAMS_INVISIBLE])
+									{
+										ImGui::Text(crypt_str("Invisible "));
+										ImGui::SameLine();
+										ImGui::ColorEdit(crypt_str("##chamsinvisible"), &g_cfg.player.type[player].xqz_color, ALPHA);
+									}
+
+									ImGui::Checkbox(crypt_str("Animated material"), &g_cfg.player.type[player].animated_material);
+									ImGui::SameLine();
+									ImGui::ColorEdit(crypt_str("##animcolormat"), &g_cfg.player.type[player].animated_material_color, ALPHA);
+
+									if (player == ENEMY)
+									{
+										ImGui::Checkbox(crypt_str("Shadow"), &g_cfg.player.backtrack_chams);
+
+										if (g_cfg.player.backtrack_chams)
+										{
+											ImGui::Combo(crypt_str("Shadow material"), &g_cfg.player.backtrack_chams_material, chamstype, ARRAYSIZE(chamstype));
+
+											ImGui::Text(crypt_str("Color "));
+											ImGui::SameLine();
+											ImGui::ColorEdit(crypt_str("##backtrackcolor"), &g_cfg.player.backtrack_chams_color, ALPHA);
+										}
+									}
 							}
 
 						}
@@ -1627,20 +1659,20 @@ void c_menu::render2(bool is_open)
 						}
 					}
 					e_elements::end_child();
-					break;
-				}
-				break;
+                break;
+                }
+            break;
 			case settings:
-				draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
+                draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
 
-				ImGui::SetCursorPos({ 57, 86 });
-				ImGui::BeginGroup(); {
-					if (elements::subtab("Main", subtab7 == Main)) { subtab7 = Main; }
+                ImGui::SetCursorPos({ 57, 86 });
+                ImGui::BeginGroup(); {
+                    if (elements::subtab("Main", subtab7 == Main)) { subtab7 = Main; }
 					if (elements::subtab("Extra", subtab7 == Main2)) { subtab7 = Main2; }
-				} ImGui::EndGroup();
+                } ImGui::EndGroup();
 
-				switch (subtab7) {
-				case Main:
+                switch (subtab7) {
+                case Main:
 					ImGui::SetCursorPos({ 226, 16 });
 					e_elements::begin_child("Misc", ImVec2(240, 430));
 					{
@@ -1689,24 +1721,24 @@ void c_menu::render2(bool is_open)
 						ImGui::Checkbox(crypt_str("Remove CS:GO logs"), &g_cfg.misc.show_default_log);
 					}
 					e_elements::end_child();
-					break;
+                break;
 				case Main2:
 					ImGui::SetCursorPos({ 226, 16 });
 					e_elements::begin_child("Misc", ImVec2(240, 430));
 					{
 
-						//tab_start();
+							//tab_start();
 
-						ImGui::Checkbox(crypt_str("Automatic jump"), &g_cfg.misc.bunnyhop);
-						ImGui::Combo(crypt_str("Automatic strafes"), &g_cfg.misc.airstrafe, strafes, ARRAYSIZE(strafes));
-						ImGui::Checkbox(crypt_str("Crouch in air"), &g_cfg.misc.crouch_in_air);
-						ImGui::Checkbox(crypt_str("Fast stop"), &g_cfg.misc.fast_stop);
-						ImGui::Checkbox(crypt_str("No duck cooldown"), &g_cfg.misc.noduck);
-						draw_keybind(crypt_str("Edge jump"), &g_cfg.misc.edge_jump, crypt_str("##EDGEJUMP__HOTKEY"));
-						draw_keybind(crypt_str("Edge bug"), &g_cfg.misc.edgebug, crypt_str("##EDGEBUG__HOTKEY"));
-						draw_keybind(crypt_str("Jump bug"), &g_cfg.misc.jumpbug, crypt_str("##JUMPBUG__HOTKEY"));
+							ImGui::Checkbox(crypt_str("Automatic jump"), &g_cfg.misc.bunnyhop);
+							ImGui::Combo(crypt_str("Automatic strafes"), &g_cfg.misc.airstrafe, strafes, ARRAYSIZE(strafes));
+							ImGui::Checkbox(crypt_str("Crouch in air"), &g_cfg.misc.crouch_in_air);
+							ImGui::Checkbox(crypt_str("Fast stop"), &g_cfg.misc.fast_stop);
+							ImGui::Checkbox(crypt_str("No duck cooldown"), &g_cfg.misc.noduck);
+							draw_keybind(crypt_str("Edge jump"), &g_cfg.misc.edge_jump, crypt_str("##EDGEJUMP__HOTKEY"));
+							draw_keybind(crypt_str("Edge bug"), &g_cfg.misc.edgebug, crypt_str("##EDGEBUG__HOTKEY"));
+							draw_keybind(crypt_str("Jump bug"), &g_cfg.misc.jumpbug, crypt_str("##JUMPBUG__HOTKEY"));
 
-					}
+						}
 					e_elements::end_child();
 
 					ImGui::SetCursorPos({ 476, 16 });
@@ -1729,150 +1761,169 @@ void c_menu::render2(bool is_open)
 					}
 					e_elements::end_child();
 					break;
-				}
-				break;
+                }
+            break;
 			case skins:
-				draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
+                draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
 
-				ImGui::SetCursorPos({ 57, 86 });
-				ImGui::BeginGroup(); {
-					if (elements::subtab("Skins", subtab6 == Skins)) { subtab6 = Skins; }
+                ImGui::SetCursorPos({ 57, 86 });
+                ImGui::BeginGroup(); {
+                    if (elements::subtab("Skins", subtab6 == Skins)) { subtab6 = Skins; }
+                    if (elements::subtab("Mask Changer", subtab6 == MaskChanger)) { subtab6 = MaskChanger; }
 					if (elements::subtab("Players", subtab6 == Player)) { subtab6 = Player; }
-				} ImGui::EndGroup();
+                } ImGui::EndGroup();
 
-				switch (subtab6) {
-				case skins:
-					draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
+                switch (subtab6) {
+                case Skins:
+					ImGui::SetCursorPos({ 226, 16 });
+					e_elements::begin_child("Skins", ImVec2(240 + 240, 430));
+					{
+						// we need to count our items in 1 line
+						int same_line_counter = 0;
 
-					ImGui::SetCursorPos({ 57, 86 });
-					ImGui::BeginGroup(); {
-						if (elements::subtab("Skins", subtab6 == Skins)) { subtab6 = Skins; }
-						if (elements::subtab("Mask Changer", subtab6 == MaskChanger)) { subtab6 = MaskChanger; }
-						if (elements::subtab("Players", subtab6 == Player)) { subtab6 = Player; }
-					} ImGui::EndGroup();
-
-					switch (subtab6) {
-					case Skins:
-						ImGui::SetCursorPos({ 226, 16 });
-						e_elements::begin_child("Skins", ImVec2(240 + 240, 430));
+						// if we didnt choose any weapon
+						if (current_profile == -1)
 						{
-							// we need to count our items in 1 line
-							int same_line_counter = 0;
-
-							// if we didnt choose any weapon
-							if (current_profile == -1)
+							for (auto i = 0; i < g_cfg.skins.skinChanger.size(); i++)
 							{
-								for (auto i = 0; i < g_cfg.skins.skinChanger.size(); i++)
+								// do we need update our preview for some reasons?
+								if (all_skins[i] == nullptr)
+									all_skins[i] = get_skin_preview(get_wep(i, (i == 0 || i == 1) ? g_cfg.skins.skinChanger.at(i).definition_override_vector_index : -1, i == 0).c_str(), g_cfg.skins.skinChanger.at(i).skin_name, device);
+
+								// we licked on weapon
+								if (ImGui::ImageButton(all_skins[i], ImVec2(67 * dpi_scale, 36 * dpi_scale)))
 								{
-									// do we need update our preview for some reasons?
-									if (all_skins[i] == nullptr)
-										all_skins[i] = get_skin_preview(get_wep(i, (i == 0 || i == 1) ? g_cfg.skins.skinChanger.at(i).definition_override_vector_index : -1, i == 0).c_str(), g_cfg.skins.skinChanger.at(i).skin_name, device);
+									next_id = i;
+									active_animation = true;
+								}
 
-									// we licked on weapon
-									if (ImGui::ImageButton(all_skins[i], ImVec2(67 * dpi_scale, 36 * dpi_scale)))
+								// if our animation step is half from all - switch profile
+								if (active_animation && preview_reverse)
+								{
+									ImGui::SetScrollY(0);
+									current_profile = next_id;
+								}
+
+
+								if (same_line_counter < 4) { // continue push same-line
+									ImGui::SameLine();
+									same_line_counter++;
+								}
+								else { // we have maximum elements in 1 line
+									same_line_counter = 0;
+								}
+							}
+						}
+						else
+						{
+							// update skin preview bool
+							static bool need_update[36];
+
+							// we pressed "Save & Close" button
+							static bool leave;
+
+							// update if we have nullptr texture or if we push force update
+							if (all_skins[current_profile] == nullptr || need_update[current_profile])
+							{
+								all_skins[current_profile] = get_skin_preview(get_wep(current_profile, (current_profile == 0 || current_profile == 1) ? g_cfg.skins.skinChanger.at(current_profile).definition_override_vector_index : -1, current_profile == 0).c_str(), g_cfg.skins.skinChanger.at(current_profile).skin_name, device);
+								need_update[current_profile] = false;
+							}
+
+							// get settings for selected weapon
+							auto& selected_entry = g_cfg.skins.skinChanger[current_profile];
+							selected_entry.itemIdIndex = current_profile;
+
+							ImGui::BeginGroup();
+							ImGui::PushItemWidth(260 * dpi_scale);
+
+							// search input later
+							static char search_skins[64] = "";
+							static auto item_index = selected_entry.paint_kit_vector_index;
+							if (!current_profile)
+							{
+								ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 5 * c_menu::get().dpi_scale);
+								if (ImGui::Combo("Knife", &selected_entry.definition_override_vector_index, [](void* data, int idx, const char** out_text)
 									{
-										next_id = i;
-										active_animation = true;
-									}
-
-									// if our animation step is half from all - switch profile
-									if (active_animation && preview_reverse)
+										*out_text = game_data::knife_names[idx].name;
+										return true;
+									}, nullptr, IM_ARRAYSIZE(game_data::knife_names)))
+									need_update[current_profile] = true; // push force update
+							}
+							else if (current_profile == 1)
+							{
+								ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 5 * c_menu::get().dpi_scale);
+								if (ImGui::Combo("Gloves", &selected_entry.definition_override_vector_index, [](void* data, int idx, const char** out_text)
 									{
-										ImGui::SetScrollY(0);
-										current_profile = next_id;
-									}
-
-
-									if (same_line_counter < 4) { // continue push same-line
-										ImGui::SameLine();
-										same_line_counter++;
-									}
-									else { // we have maximum elements in 1 line
-										same_line_counter = 0;
-									}
+										*out_text = game_data::glove_names[idx].name;
+										return true;
+									}, nullptr, IM_ARRAYSIZE(game_data::glove_names)))
+								{
+									item_index = 0; // set new generated paintkits element to 0;
+									need_update[current_profile] = true; // push force update
 								}
 							}
 							else
+								selected_entry.definition_override_vector_index = 0;
+
+							if (current_profile != 1)
 							{
-								// update skin preview bool
-								static bool need_update[36];
+								ImGui::Text("Search");
 
-								// we pressed "Save & Close" button
-								static bool leave;
+								if (ImGui::InputText("", search_skins, sizeof(search_skins)))
+									item_index = -1;
+							}
 
-								// update if we have nullptr texture or if we push force update
-								if (all_skins[current_profile] == nullptr || need_update[current_profile])
+							auto main_kits = current_profile == 1 ? SkinChanger::gloveKits : SkinChanger::skinKits;
+							auto display_index = 0;
+
+							SkinChanger::displayKits = main_kits;
+
+							// we dont need custom gloves
+							if (current_profile == 1)
+							{
+								for (auto i = 0; i < main_kits.size(); i++)
 								{
-									all_skins[current_profile] = get_skin_preview(get_wep(current_profile, (current_profile == 0 || current_profile == 1) ? g_cfg.skins.skinChanger.at(current_profile).definition_override_vector_index : -1, current_profile == 0).c_str(), g_cfg.skins.skinChanger.at(current_profile).skin_name, device);
-									need_update[current_profile] = false;
-								}
+									auto main_name = main_kits.at(i).name;
 
-								// get settings for selected weapon
-								auto& selected_entry = g_cfg.skins.skinChanger[current_profile];
-								selected_entry.itemIdIndex = current_profile;
+									for (auto i = 0; i < main_name.size(); i++)
+										if (iswalpha((main_name.at(i))))
+											main_name.at(i) = towlower(main_name.at(i));
 
-								ImGui::BeginGroup();
-								ImGui::PushItemWidth(260 * dpi_scale);
+									char search_name[64];
 
-								// search input later
-								static char search_skins[64] = "";
-								static auto item_index = selected_entry.paint_kit_vector_index;
-								if (!current_profile)
-								{
-									ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 5 * c_menu::get().dpi_scale);
-									if (ImGui::Combo("Knife", &selected_entry.definition_override_vector_index, [](void* data, int idx, const char** out_text)
-										{
-											*out_text = game_data::knife_names[idx].name;
-											return true;
-										}, nullptr, IM_ARRAYSIZE(game_data::knife_names)))
-										need_update[current_profile] = true; // push force update
-								}
-								else if (current_profile == 1)
-								{
-									ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 5 * c_menu::get().dpi_scale);
-									if (ImGui::Combo("Gloves", &selected_entry.definition_override_vector_index, [](void* data, int idx, const char** out_text)
-										{
-											*out_text = game_data::glove_names[idx].name;
-											return true;
-										}, nullptr, IM_ARRAYSIZE(game_data::glove_names)))
+									if (!strcmp(game_data::glove_names[selected_entry.definition_override_vector_index].name, "Hydra"))
+										strcpy_s(search_name, sizeof(search_name), "Bloodhound");
+									else
+										strcpy_s(search_name, sizeof(search_name), game_data::glove_names[selected_entry.definition_override_vector_index].name);
+
+									for (auto i = 0; i < sizeof(search_name); i++)
+										if (iswalpha(search_name[i]))
+											search_name[i] = towlower(search_name[i]);
+
+									if (main_name.find(search_name) != std::string::npos)
 									{
-										item_index = 0; // set new generated paintkits element to 0;
-										need_update[current_profile] = true; // push force update
+										SkinChanger::displayKits.at(display_index) = main_kits.at(i);
+										display_index++;
 									}
 								}
-								else
-									selected_entry.definition_override_vector_index = 0;
 
-								if (current_profile != 1)
-								{
-									ImGui::Text("Search");
-
-									if (ImGui::InputText("", search_skins, sizeof(search_skins)))
-										item_index = -1;
-								}
-
-								auto main_kits = current_profile == 1 ? SkinChanger::gloveKits : SkinChanger::skinKits;
-								auto display_index = 0;
-
-								SkinChanger::displayKits = main_kits;
-
-								// we dont need custom gloves
-								if (current_profile == 1)
+								SkinChanger::displayKits.erase(SkinChanger::displayKits.begin() + display_index, SkinChanger::displayKits.end());
+							}
+							else
+							{
+								// TODO: fix ru finding symbols ('Градиент' не будет найден по запросу 'градиент' etc)
+								if (strcmp(search_skins, "")) //-V526
 								{
 									for (auto i = 0; i < main_kits.size(); i++)
 									{
 										auto main_name = main_kits.at(i).name;
 
 										for (auto i = 0; i < main_name.size(); i++)
-											if (iswalpha((main_name.at(i))))
+											if (iswalpha(main_name.at(i)))
 												main_name.at(i) = towlower(main_name.at(i));
 
 										char search_name[64];
-
-										if (!strcmp(game_data::glove_names[selected_entry.definition_override_vector_index].name, "Hydra"))
-											strcpy_s(search_name, sizeof(search_name), "Bloodhound");
-										else
-											strcpy_s(search_name, sizeof(search_name), game_data::glove_names[selected_entry.definition_override_vector_index].name);
+										strcpy_s(search_name, sizeof(search_name), search_skins);
 
 										for (auto i = 0; i < sizeof(search_name); i++)
 											if (iswalpha(search_name[i]))
@@ -1888,169 +1939,139 @@ void c_menu::render2(bool is_open)
 									SkinChanger::displayKits.erase(SkinChanger::displayKits.begin() + display_index, SkinChanger::displayKits.end());
 								}
 								else
-								{
-									// TODO: fix ru finding symbols ('Градиент' не будет найден по запросу 'градиент' etc)
-									if (strcmp(search_skins, "")) //-V526
-									{
-										for (auto i = 0; i < main_kits.size(); i++)
-										{
-											auto main_name = main_kits.at(i).name;
-
-											for (auto i = 0; i < main_name.size(); i++)
-												if (iswalpha(main_name.at(i)))
-													main_name.at(i) = towlower(main_name.at(i));
-
-											char search_name[64];
-											strcpy_s(search_name, sizeof(search_name), search_skins);
-
-											for (auto i = 0; i < sizeof(search_name); i++)
-												if (iswalpha(search_name[i]))
-													search_name[i] = towlower(search_name[i]);
-
-											if (main_name.find(search_name) != std::string::npos)
-											{
-												SkinChanger::displayKits.at(display_index) = main_kits.at(i);
-												display_index++;
-											}
-										}
-
-										SkinChanger::displayKits.erase(SkinChanger::displayKits.begin() + display_index, SkinChanger::displayKits.end());
-									}
-									else
-										item_index = selected_entry.paint_kit_vector_index;
-								}
-
-								ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.f);
-								if (!SkinChanger::displayKits.empty())
-								{
-									if (ImGui::ListBox("", &item_index, [](void* data, int idx, const char** out_text)
-										{
-											while (SkinChanger::displayKits.at(idx).name.find("С‘") != std::string::npos) //-V807
-												SkinChanger::displayKits.at(idx).name.replace(SkinChanger::displayKits.at(idx).name.find("С‘"), 2, "Рµ");
-
-											*out_text = SkinChanger::displayKits.at(idx).name.c_str();
-											return true;
-										}, nullptr, SkinChanger::displayKits.size(), SkinChanger::displayKits.size() > 9 ? 9 : SkinChanger::displayKits.size()) || !all_skins[current_profile])
-									{
-										need_update[current_profile] = true;
-
-										auto i = 0;
-
-										while (i < main_kits.size())
-										{
-											if (main_kits.at(i).id == SkinChanger::displayKits.at(item_index).id)
-											{
-												selected_entry.paint_kit_vector_index = i;
-												break;
-											}
-
-											i++;
-										}
-
-									}
-								}
-								ImGui::PopStyleVar();
-
-								if (ImGui::InputInt("Seed", &selected_entry.seed, 1, 100))
-
-
-									if (ImGui::InputInt("StatTrak", &selected_entry.stat_trak, 1, 15))
-
-
-										if (ImGui::SliderFloat("Wear", &selected_entry.wear, 0.0f, 1.0f))
-											drugs = true;
-										else if (drugs)
-										{
-
-											drugs = false;
-										}
-								ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 5 * c_menu::get().dpi_scale);
-								if (ImGui::Combo("Quality", &selected_entry.entity_quality_vector_index, [](void* data, int idx, const char** out_text)
-									{
-										*out_text = game_data::quality_names[idx].name;
-										return true;
-									}, nullptr, IM_ARRAYSIZE(game_data::quality_names)))
-
-
-									if (current_profile != 1)
-									{
-										if (!g_cfg.skins.custom_name_tag[current_profile].empty())
-											strcpy_s(selected_entry.custom_name, sizeof(selected_entry.custom_name), g_cfg.skins.custom_name_tag[current_profile].c_str());
-
-										ImGui::Text("Name Tag");
-
-										if (ImGui::InputText("Name Tag", selected_entry.custom_name, sizeof(selected_entry.custom_name)))
-										{
-											g_cfg.skins.custom_name_tag[current_profile] = selected_entry.custom_name;
-
-										}
-									}
-
-									if (ImGui::CustomButton(crypt_str("Save & Close"), crypt_str("##SKINS_CLOSE"), ImVec2(220 * dpi_scale, 26 * dpi_scale)))
-									{
-										// start animation
-										active_animation = true;
-										next_id = -1;
-										leave = true;
-									}
-
-									ImGui::PopItemWidth();
-
-									ImGui::EndGroup();
-
-									ImGui::SameLine();
-									ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 286 * dpi_scale - 200 * dpi_scale);
-
-									ImGui::BeginGroup();
-									if (ImGui::ImageButton(all_skins[current_profile], ImVec2(190 * dpi_scale, 155 * dpi_scale)))
-									{
-										// maybe i will do smth later where, who knows :/
-									}
-									ImGui::EndGroup();
-
-									// update element
-									selected_entry.update();
-
-									// we need to reset profile in the end to prevent render images with massive's index == -1
-									if (leave && ((active_animation && preview_reverse) || !active_animation))
-									{
-
-										ImGui::SetScrollY(0);
-										current_profile = next_id;
-										leave = false;
-									}
-
+									item_index = selected_entry.paint_kit_vector_index;
 							}
-						}
-						e_elements::end_child();
-						break;
-					case MaskChanger:
-					{
-						ImGui::SetCursorPos({ 226, 16 });
-						e_elements::begin_child("Mask Changer", ImVec2(240, 240));
-						{
-							ImGui::Checkbox("Enable Mask Changer", &g_cfg.esp.EnableMaskChanger);
-							if (g_cfg.esp.EnableMaskChanger)
+
+							ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.f);
+							if (!SkinChanger::displayKits.empty())
 							{
-								ImGui::Combo(crypt_str("MaskModels"), &g_cfg.esp.mask_models, mask_changer_models, ARRAYSIZE(mask_changer_models));
+								if (ImGui::ListBox("", &item_index, [](void* data, int idx, const char** out_text)
+									{
+										while (SkinChanger::displayKits.at(idx).name.find("С‘") != std::string::npos) //-V807
+											SkinChanger::displayKits.at(idx).name.replace(SkinChanger::displayKits.at(idx).name.find("С‘"), 2, "Рµ");
+
+										*out_text = SkinChanger::displayKits.at(idx).name.c_str();
+										return true;
+									}, nullptr, SkinChanger::displayKits.size(), SkinChanger::displayKits.size() > 9 ? 9 : SkinChanger::displayKits.size()) || !all_skins[current_profile])
+								{
+									need_update[current_profile] = true;
+
+									auto i = 0;
+
+									while (i < main_kits.size())
+									{
+										if (main_kits.at(i).id == SkinChanger::displayKits.at(item_index).id)
+										{
+											selected_entry.paint_kit_vector_index = i;
+											break;
+										}
+
+										i++;
+									}
+
+								}
 							}
+							ImGui::PopStyleVar();
+
+							if (ImGui::InputInt("Seed", &selected_entry.seed, 1, 100))
+
+
+								if (ImGui::InputInt("StatTrak", &selected_entry.stat_trak, 1, 15))
+
+
+									if (ImGui::SliderFloat("Wear", &selected_entry.wear, 0.0f, 1.0f))
+										drugs = true;
+									else if (drugs)
+									{
+
+										drugs = false;
+									}
+							ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 5 * c_menu::get().dpi_scale);
+							if (ImGui::Combo("Quality", &selected_entry.entity_quality_vector_index, [](void* data, int idx, const char** out_text)
+								{
+									*out_text = game_data::quality_names[idx].name;
+									return true;
+								}, nullptr, IM_ARRAYSIZE(game_data::quality_names)))
+
+
+								if (current_profile != 1)
+								{
+									if (!g_cfg.skins.custom_name_tag[current_profile].empty())
+										strcpy_s(selected_entry.custom_name, sizeof(selected_entry.custom_name), g_cfg.skins.custom_name_tag[current_profile].c_str());
+
+									ImGui::Text("Name Tag");
+
+									if (ImGui::InputText("Name Tag", selected_entry.custom_name, sizeof(selected_entry.custom_name)))
+									{
+										g_cfg.skins.custom_name_tag[current_profile] = selected_entry.custom_name;
+
+									}
+								}
+
+								if (ImGui::CustomButton(crypt_str("Save & Close"), crypt_str("##SKINS_CLOSE"), ImVec2(220 * dpi_scale, 26 * dpi_scale)))
+								{
+									// start animation
+									active_animation = true;
+									next_id = -1;
+									leave = true;
+								}
+
+								ImGui::PopItemWidth();
+
+								ImGui::EndGroup();
+
+								ImGui::SameLine();
+								ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 286 * dpi_scale - 200 * dpi_scale);
+
+								ImGui::BeginGroup();
+								if (ImGui::ImageButton(all_skins[current_profile], ImVec2(190 * dpi_scale, 155 * dpi_scale)))
+								{
+									// maybe i will do smth later where, who knows :/
+								}
+								ImGui::EndGroup();
+
+								// update element
+								selected_entry.update();
+
+								// we need to reset profile in the end to prevent render images with massive's index == -1
+								if (leave && ((active_animation && preview_reverse) || !active_animation))
+								{
+
+									ImGui::SetScrollY(0);
+									current_profile = next_id;
+									leave = false;
+								}
+
 						}
-						e_elements::end_child();
-						break;
 					}
-					case Player:
-						ImGui::SetCursorPos({ 226, 16 });
-						e_elements::begin_child("Models", ImVec2(240, 240));
+					e_elements::end_child();
+                break;
+				case MaskChanger:
+				{
+					ImGui::SetCursorPos({ 226, 16 });
+					e_elements::begin_child("Mask Changer", ImVec2(240, 240));
+					{
+						ImGui::Checkbox("Enable Mask Changer", &g_cfg.esp.EnableMaskChanger);
+						if (g_cfg.esp.EnableMaskChanger)
 						{
-							ImGui::Combo(crypt_str("Player model T"), &g_cfg.player.player_model_t, player_model_t, ARRAYSIZE(player_model_t));
-							padding(0, 3);
-							ImGui::Combo(crypt_str("Player model CT"), &g_cfg.player.player_model_ct, player_model_ct, ARRAYSIZE(player_model_ct));
+							ImGui::Combo(crypt_str("MaskModels"), &g_cfg.esp.mask_models, mask_changer_models, ARRAYSIZE(mask_changer_models));
 						}
-						e_elements::end_child();
-						break;
 					}
+					e_elements::end_child();
 					break;
 				}
+                case Player:
+					ImGui::SetCursorPos({ 226, 16 });
+					e_elements::begin_child("Models", ImVec2(240, 240));
+					{
+						ImGui::Combo(crypt_str("Player model T"), &g_cfg.player.player_model_t, player_model_t, ARRAYSIZE(player_model_t));
+						padding(0, 3);
+						ImGui::Combo(crypt_str("Player model CT"), &g_cfg.player.player_model_ct, player_model_ct, ARRAYSIZE(player_model_ct));
+					}
+					e_elements::end_child();
+                break;
+                }
+            break;
 			case rage:
 				draw->AddText(subtab_title, 15.0f, ImVec2(pos.x + 72, pos.y + 60), ImColor(1.0f, 1.0f, 1.0f, 0.4f), "MAIN");
 
@@ -2147,7 +2168,7 @@ void c_menu::render2(bool is_open)
 					}
 					e_elements::end_child();
 
-					ImGui::SetCursorPos({ 226, 16 + 121 });
+					ImGui::SetCursorPos({ 226, 16  + 121 });
 					e_elements::begin_child("Settings", ImVec2(240, 430 - 120));
 					{
 						if (g_cfg.ragebot.enable)
@@ -2281,14 +2302,14 @@ void c_menu::render2(bool is_open)
 							std::string folder;
 
 							auto get_dir = [&folder]() -> void
-								{
-									static TCHAR path[MAX_PATH];
+							{
+								static TCHAR path[MAX_PATH];
 
-									if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, NULL, path)))
-										folder = std::string(path) + crypt_str("C:\\Medusa.uno\\Configs\\");
+								if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, NULL, path)))
+									folder = std::string(path) + crypt_str("C:\\Medusa.uno\\Configs\\");
 
-									CreateDirectory(folder.c_str(), NULL);
-								};
+								CreateDirectory(folder.c_str(), NULL);
+							};
 
 							get_dir();
 							ShellExecute(NULL, crypt_str("open"), folder.c_str(), NULL, NULL, SW_SHOWNORMAL);
@@ -2386,14 +2407,14 @@ void c_menu::render2(bool is_open)
 								std::string folder;
 
 								auto get_dir = [&folder]() -> void
-									{
-										static TCHAR path[MAX_PATH];
+								{
+									static TCHAR path[MAX_PATH];
 
-										if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, NULL, path)))
-											folder = std::string(path) + crypt_str("C:\\Medusa.uno\\Scripts\\");
+									if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, NULL, path)))
+										folder = std::string(path) + crypt_str("C:\\Medusa.uno\\Scripts\\");
 
-										CreateDirectory(folder.c_str(), NULL);
-									};
+									CreateDirectory(folder.c_str(), NULL);
+								};
 
 								get_dir();
 								ShellExecute(NULL, crypt_str("open"), folder.c_str(), NULL, NULL, SW_SHOWNORMAL);
@@ -2529,7 +2550,7 @@ void c_menu::render2(bool is_open)
 					}
 					e_elements::end_child();
 					break;
-				case Luas2:
+					case Luas2:
 					ImGui::SetCursorPos({ 226, 16 });
 					e_elements::begin_child("Safety", ImVec2(300, 430));
 					{
