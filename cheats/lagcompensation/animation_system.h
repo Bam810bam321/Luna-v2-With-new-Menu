@@ -48,20 +48,37 @@ class resolver
 	bool fake = false;
 	bool was_first_bruteforce = false;
 	bool was_second_bruteforce = false;
+
+	struct
+	{
+		int missed_shots_corrected[65] = { 0 };;
+	}restype[8];
+
+
+
 	float lock_side = 0.0f;
 	float original_goal_feet_yaw = 0.0f;
 	float original_pitch = 0.0f;
+
 public:
 	void initialize(player_t* e, adjust_data* record, const float& goal_feet_yaw, const float& pitch);
+	void initialize_yaw(player_t* e, adjust_data* record);
 	void reset();
+
 	void resolve_yaw();
+
 	bool Saw(player_t* entity);
+
+	bool is_slow_walking();
 	bool IsFakewalking(player_t* entity);
 	resolver_side FreeStand(player_t* e);
 	resolver_side TraceSide(player_t* e);
 	void NoSpreadResolver();
 	float resolve_pitch();
 	resolver_side last_side = RESOLVER_ORIGINAL;
+
+	float b_yaw(player_t* player, float angle, int n);
+
 };
 
 class adjust_data
@@ -88,6 +105,10 @@ public:
 	float simulation_time;
 	float duck_amount;
 	float lby;
+
+	float left;
+	float right;
+	float middle;
 
 	Vector angles;
 	Vector abs_angles;
