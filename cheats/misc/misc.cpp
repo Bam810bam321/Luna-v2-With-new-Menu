@@ -1530,24 +1530,25 @@ void misc::hide_shots(CUserCmd* m_pcmd, bool should_work)
 		g_ctx.globals.tickbase_shift = g_ctx.globals.next_tickbase_shift;
 }
 
-void misc::left_hand_knife(ClientFrameStage_t stage)
-{
-	if (!g_cfg.misc.left_knife)
-		return;
-
-	if (stage != ClientFrameStage_t::FRAME_RENDER_START && stage != ClientFrameStage_t::FRAME_RENDER_END)
-		return;
-
-	const static auto cl_righthand = m_cvar()->FindVar(crypt_str("cl_righthand"));
-
-	const auto weapon_knife = g_ctx.globals.weapon->is_knife();
-
-	if (weapon_knife)
-		cl_righthand->SetValue(false);
-	else
-		cl_righthand->SetValue(true);
-
-}
+// need to fix left hand knife it doesn't switch back after toggle off
+//void misc::left_hand_knife(ClientFrameStage_t stage)
+//{
+//	if (!g_cfg.misc.left_knife)
+//		return;
+//
+//	if (stage != ClientFrameStage_t::FRAME_RENDER_START && stage != ClientFrameStage_t::FRAME_RENDER_END)
+//		return;
+//
+//	const static auto cl_righthand = m_cvar()->FindVar(crypt_str("cl_righthand"));
+//
+//	const auto weapon_knife = g_ctx.globals.weapon->is_knife();
+//
+//	if (weapon_knife)
+//		cl_righthand->SetValue(false);
+//	else
+//		cl_righthand->SetValue(true);
+//
+//}
 
 void misc::fake_ping(ClientFrameStage_t stage)
 {
