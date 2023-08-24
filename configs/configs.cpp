@@ -224,6 +224,7 @@ void C_ConfigManager::setup()
 	setup_item(&g_cfg.esp.grenade_prediction_color, Color(255, 255, 255), crypt_str("Esp.grenade_prediction_color"));
 	setup_item(&g_cfg.esp.grenade_prediction_tracer_color, Color(255, 255, 255), crypt_str("Esp.grenade_prediction_tracer_color"));
 	setup_item(&g_cfg.esp.projectiles, false, crypt_str("Esp.projectiles"));
+	setup_item(&g_cfg.esp.lightingonshot, false, crypt_str("Esp.lightingonshot"));
 	setup_item(&g_cfg.esp.projectiles_color, Color(255, 255, 255), crypt_str("Esp.projectiles_color"));
 	setup_item(&g_cfg.esp.grenade_proximity_tracers_colors, Color(255, 255, 255), crypt_str("Esp.grenade_proximity_tracers_colors"));
 	setup_item(&g_cfg.esp.grenade_proximity_warning_progress_color, Color(191, 44, 44), crypt_str("Esp.grenade_proximity_warning_progress_color"));
