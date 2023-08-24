@@ -434,40 +434,6 @@ void draw_multicombo(std::string name, std::vector<int>& variable, const char* l
 	preview = crypt_str("None"); // reset preview to use later
 }
 
-void draw_multicombo2(std::string name, int* variable, const char* labels[], int count, std::string& preview)
-{
-	auto hashname = crypt_str("") + name; // we dont want to render name of combo
-
-	for (auto i = 0, j = 0; i < count; i++)
-	{
-		if (variable[i])
-		{
-			if (j)
-				preview += crypt_str(" ") + (std::string)labels[i];
-			else
-				preview = labels[i];
-
-			j++;
-		}
-	}
-
-	if (ImGui::BeginCombo(hashname.c_str(), preview.c_str())) // draw start
-	{
-		ImGui::BeginGroup();
-		{
-
-			for (auto i = 0; i < count; i++)
-				ImGui::Selectable(labels[i], (bool*)&variable[i], ImGuiSelectableFlags_DontClosePopups);
-
-		}
-		ImGui::EndGroup();
-
-		ImGui::EndCombo();
-	}
-
-	preview = crypt_str("None"); // reset preview to use later
-}
-
 bool LabelClick(const char* label, bool* v, const char* unique_id)
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -1567,7 +1533,7 @@ void c_menu::render2(bool is_open)
 
 									if (g_cfg.player.type[player].chams[PLAYER_CHAMS_VISIBLE] && g_cfg.player.type[player].chams[PLAYER_CHAMS_INVISIBLE])
 									{
-										ImGui::Text(crypt_str("Invisible "));
+										ImGui::Text(crypt_str("Invisible "));	
 										ImGui::SameLine();
 										ImGui::ColorEdit(crypt_str("##chamsinvisible"), &g_cfg.player.type[player].xqz_color, ALPHA);
 									}
