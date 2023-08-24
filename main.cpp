@@ -436,22 +436,22 @@ inline eye_angle_fix _yes_fuck;
 
 void* pBuildTransformationsEntity;
 Vector vecBuildTransformationsAngles;
-Vector* __fastcall hkGetEyeAngles(void* ecx, void* edx)
-{
-    static int* WantedReturnAddress = (int*)util::FindSignature("client.dll", "8B 55 0C 8B C8 E8 ? ? ? ? 83 C4 08 5E 8B E5");
-
-    static auto oGetEyeAngles = hooks::player_hook->get_func_address <eye_angle_fix>(170);
-
-    if (_ReturnAddress() != WantedReturnAddress)
-        return oGetEyeAngles(ecx);
-
-    if (!ecx || pBuildTransformationsEntity != ecx)
-        return oGetEyeAngles(ecx);
-
-    pBuildTransformationsEntity = nullptr;
-
-    return &vecBuildTransformationsAngles;
-}
+//Vector* __fastcall hkGetEyeAngles(void* ecx, void* edx)
+//{
+//    static int* WantedReturnAddress = (int*)util::FindSignature("client.dll", "8B 55 0C 8B C8 E8 ? ? ? ? 83 C4 08 5E 8B E5");
+//
+//    static auto oGetEyeAngles = hooks::player_hook->get_func_address <eye_angle_fix>(170);
+//
+//    if (_ReturnAddress() != WantedReturnAddress)
+//        return oGetEyeAngles(ecx);
+//
+//    if (!ecx || pBuildTransformationsEntity != ecx)
+//        return oGetEyeAngles(ecx);
+//
+//    pBuildTransformationsEntity = nullptr;
+//
+//    return &vecBuildTransformationsAngles;
+//}
 using BuildTransformations = Vector * (__thiscall*)(void*, CStudioHdr* hdr, Vector* pos, Quaternion* q, matrix3x4_t* cameraTransform, int bonemask, byte* computed);
 void __fastcall hkBuildTransformations(void* ecx, void* edx, CStudioHdr* hdr, Vector* pos, Quaternion* q, matrix3x4_t* cameraTransform, int bonemask, byte* computed) {
 
