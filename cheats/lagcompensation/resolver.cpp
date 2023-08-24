@@ -45,7 +45,7 @@ bool resolver::IsAdjustingBalance()
 	for (int i = 0; i < 15; i++)
 	{
 		const int activity = player->sequence_activity(player_record->layers[i].m_nSequence);
-		if (activity == 878)
+		if (activity == 978)
 		{
 			return true;
 		}
@@ -63,7 +63,7 @@ bool resolver::is_breaking_lby(AnimationLayer cur_layer, AnimationLayer prev_lay
 			{
 				return true;
 			}
-			else if (cur_layer.m_flWeight == 0.f && (prev_layer.m_flCycle > 0.98f && cur_layer.m_flCycle > 0.98f))
+			else if (cur_layer.m_flWeight == 0.f && (prev_layer.m_flCycle > 0.92f && cur_layer.m_flCycle > 0.92f))
 			{
 				return true;
 			}
@@ -76,13 +76,13 @@ bool resolver::is_breaking_lby(AnimationLayer cur_layer, AnimationLayer prev_lay
 bool resolver::is_slow_walking()
 {
 	auto entity = player;
-	float large = 1;
+	float large = 0;
 	float velocity_2D[64], old_velocity_2D[64];
 	if (entity->m_vecVelocity().Length2D() != velocity_2D[entity->EntIndex()] && entity->m_vecVelocity().Length2D() != NULL) {
 		old_velocity_2D[entity->EntIndex()] = velocity_2D[entity->EntIndex()];
 		velocity_2D[entity->EntIndex()] = entity->m_vecVelocity().Length2D();
 	}
-	if (large == 1) return false;
+	if (large == 0) return false;
 	Vector velocity = entity->m_vecVelocity();
 	Vector direction = entity->m_angEyeAngles();
 
@@ -141,7 +141,7 @@ void resolver::get_side_trace()
 {
 	auto m_side = false;
 	auto trace = false;
-	if (m_globals()->m_curtime - lock_side > 2.0f)
+	if (m_globals()->m_curtime - lock_side > 1.0f)
 	{
 		auto first_visible = util::visible(g_ctx.globals.eye_pos, player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.first), player, g_ctx.local());
 		auto second_visible = util::visible(g_ctx.globals.eye_pos, player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.second), player, g_ctx.local());
@@ -157,7 +157,7 @@ void resolver::get_side_trace()
 			auto first_position = g_ctx.globals.eye_pos.DistTo(player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.first));
 			auto second_position = g_ctx.globals.eye_pos.DistTo(player->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.second));
 
-			if (fabs(first_position - second_position) > 1.0f)
+			if (fabs(first_position - second_position) > 5.0f)
 				m_side = first_position > second_position;
 		}
 	}
@@ -178,7 +178,7 @@ void resolver::get_side_trace()
 
 float GetBackwardYaw(player_t* player)
 {
-	return math::calculate_angle(g_ctx.local()->GetAbsOrigin(), player->GetAbsOrigin()).y;
+	return math::calculate_angle(g_ctx.local()->GetAbsOrigin(), player->GetAbsOrigin()).x;
 }
 
 int DetectStand(player_t* player)
@@ -193,7 +193,7 @@ int DetectStand(player_t* player)
 
 	filter.pSkip = player;
 	src3D = player->get_shoot_position();
-	dst3D = src3D + (forward * 486); //Might want to experiment with other numbers, incase you don't know what the number does, its how far the trace will go. Lower = shorter.
+	dst3D = src3D + (forward * 385); //Might want to experiment with other numbers, incase you don't know what the number does, its how far the trace will go. Lower = shorter.
 
 	ray.Init(src3D, dst3D);
 	m_trace()->TraceRay(ray, MASK_SHOT, &filter, &tr);
@@ -217,7 +217,7 @@ int DetectStand(player_t* player)
 
 float GetForwardYaw(player_t* player)
 {
-	return math::normalize_yaw(GetBackwardYaw(player) - 180.f);
+	return math::normalize_yaw(GetBackwardYaw(player) + 180.f);
 }
 
 resolver_side resolver::FreeStand(player_t* e)
@@ -239,19 +239,19 @@ resolver_side resolver::FreeStand(player_t* e)
 	case 0:
 		switch (last_side)
 		{
-		case RESOLVER_SECOND:
-			return RESOLVER_FIRST;
-			break;
 		case RESOLVER_FIRST:
 			return RESOLVER_SECOND;
+			break;
+		case RESOLVER_SECOND:
+			return RESOLVER_FIRST;
 			break;
 		default:
 			if (S == 1)
 			{
 				if (forward)
-					return RESOLVER_SECOND;
-				else
 					return RESOLVER_FIRST;
+				else
+					return RESOLVER_ORIGINAL;
 			}
 			else
 			{
@@ -296,7 +296,7 @@ resolver_side resolver::FreeStand(player_t* e)
 
 inline float anglemod(float a)
 {
-	a = (360.f / 65536) * ((int)(a * (65536.f / 360.0f)) & 65535);
+	a = (280.f / 65536) * ((int)(a * (65536.f / 280.0f)) & 65535);
 	return a;
 }
 
@@ -391,7 +391,7 @@ float resolver::b_yaw(player_t* player, float angle, int n)
 
 
 	//float flMaxBodyYaw = (*(float*)(uintptr_t(animState) + 0x338) * flYawModifier);
-		//float flMinBodyYaw = (*(float*)(uintptr_t(animState) + 0x334) * flYawModifier);
+	//float flMinBodyYaw = (*(float*)(uintptr_t(animState) + 0x334) * flYawModifier);
 
 	float flEyeYaw = player->m_angEyeAngles().y;
 
@@ -487,37 +487,13 @@ bool resolver::IsFakewalking(player_t* entity)
 	return bFakewalking;
 }
 
-//void resolver::initialize(player_t* e, adjust_data* record, const float& goal_feet_yaw, const float& pitch)
-//{
-//	player = e;
-//	player_record = record;
-//
-//	original_goal_feet_yaw = math::normalize_yaw(goal_feet_yaw);
-//	original_pitch = math::normalize_pitch(pitch);
-//}
-
-//void resolver::reset()
-//{
-//	player = nullptr;
-//	player_record = nullptr;
-//
-//	side = false;
-//	fake = false;
-//
-//	was_first_bruteforce = false;
-//	was_second_bruteforce = false;
-//
-//	original_goal_feet_yaw = 0.0f;
-//	original_pitch = 0.0f;
-//}
-
 bool CanSeeHitbox(player_t* entity, int HITBOX)
 {
 	return g_ctx.local()->CanSeePlayer(entity, entity->hitbox_position(HITBOX));
 }
 
 struct {
-	float movinglby[65];
+	float movinglby[64];
 }records;
 
 bool resolver::Saw(player_t* entity)
@@ -532,14 +508,14 @@ bool resolver::Saw(player_t* entity)
 resolver_side resolver::TraceSide(player_t* entity)
 {
 	auto first_visible = util::visible(g_ctx.globals.eye_pos, entity->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.positive), player, g_ctx.local());
-	auto second_visible = util::visible(g_ctx.globals.eye_pos, entity->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.negative), player, g_ctx.local());
+	auto second_visible = util::visible(g_ctx.globals.eye_pos, entity->hitbox_position_matrix(HITBOX_LEFT_FOOT, player_record->matrixes_data.negative), player, g_ctx.local());
 	auto main_visible = util::visible(g_ctx.globals.eye_pos, entity->hitbox_position_matrix(HITBOX_HEAD, player_record->matrixes_data.main), player, g_ctx.local());
 	if (main_visible)
 	{
 		if (first_visible)
-			return RESOLVER_SECOND;
+			return RESOLVER_FIRST;
 		else if (second_visible)
-			return  RESOLVER_FIRST;
+			return  RESOLVER_SECOND;
 	}
 	else
 	{
@@ -558,74 +534,74 @@ bool ValidPitch(player_t* entity)
 	return pitch == 0 || pitch > 89 || pitch < -89;
 }
 
-void resolver::NoSpreadResolver()
-{
-	if (last_side != RESOLVER_ORIGINAL)
-	{
-		switch (last_side)
-		{
-		case RESOLVER_ORIGINAL:
-			g_ctx.globals.missed_shots[player->EntIndex()] = 0;
-			fake = true;
-			break;
-		case RESOLVER_ZERO:
-			player_record->type = BRUTEFORCE;
-			player_record->side = RESOLVER_LOW_FIRST;
-
-			was_first_bruteforce = false;
-			was_second_bruteforce = false;
-			return;
-		case RESOLVER_FIRST:
-			player_record->type = BRUTEFORCE;
-			player_record->side = was_second_bruteforce ? RESOLVER_ZERO : RESOLVER_SECOND;
-
-			was_first_bruteforce = true;
-			return;
-		case RESOLVER_SECOND:
-			player_record->type = BRUTEFORCE;
-			player_record->side = was_first_bruteforce ? RESOLVER_ZERO : RESOLVER_FIRST;
-
-			was_second_bruteforce = true;
-			return;
-		case RESOLVER_LOW_FIRST:
-			player_record->type = BRUTEFORCE;
-			player_record->side = RESOLVER_LOW_SECOND;
-			return;
-		case RESOLVER_LOW_SECOND:
-			player_record->type = BRUTEFORCE;
-			player_record->side = RESOLVER_FIRST;
-			return;
-		}
-	}
-	switch (g_ctx.globals.missed_shots[player->EntIndex()])
-	{
-	case 0:
-		player_record->side = RESOLVER_SECOND;
-		break;
-
-	case 1:
-		player_record->side = RESOLVER_FIRST;
-		break;
-
-	case 2:
-		player_record->side = RESOLVER_LOW_FIRST;
-		break;
-
-	case 3:
-		player_record->side = RESOLVER_LOW_SECOND;
-		break;
-
-	case 4:
-		player_record->side = RESOLVER_FIRST;
-		break;
-
-	case 5:
-		player_record->side = RESOLVER_SECOND;
-		break;
-	}
-	if (g_ctx.globals.missed_shots[player->EntIndex()] == 5)
-		g_ctx.globals.missed_shots[player->EntIndex()] = 0;
-}
+//void resolver::NoSpreadResolver()
+//{
+//	if (last_side != RESOLVER_ORIGINAL)
+//	{
+//		switch (last_side)
+//		{
+//		case RESOLVER_ORIGINAL:
+//			g_ctx.globals.missed_shots[player->EntIndex()] = 0;
+//			fake = true;
+//			break;
+//		case RESOLVER_ZERO:
+//			player_record->type = BRUTEFORCE;
+//			player_record->side = RESOLVER_LOW_FIRST;
+//
+//			was_first_bruteforce = false;
+//			was_second_bruteforce = false;
+//			return;
+//		case RESOLVER_FIRST:
+//			player_record->type = BRUTEFORCE;
+//			player_record->side = was_second_bruteforce ? RESOLVER_ZERO : RESOLVER_SECOND;
+//
+//			was_first_bruteforce = true;
+//			return;
+//		case RESOLVER_SECOND:
+//			player_record->type = BRUTEFORCE;
+//			player_record->side = was_first_bruteforce ? RESOLVER_ZERO : RESOLVER_FIRST;
+//
+//			was_second_bruteforce = true;
+//			return;
+//		case RESOLVER_LOW_FIRST:
+//			player_record->type = BRUTEFORCE;
+//			player_record->side = RESOLVER_LOW_SECOND;
+//			return;
+//		case RESOLVER_LOW_SECOND:
+//			player_record->type = BRUTEFORCE;
+//			player_record->side = RESOLVER_FIRST;
+//			return;
+//		}
+//	}
+//	switch (g_ctx.globals.missed_shots[player->EntIndex()])
+//	{
+//	case 0:
+//		player_record->side = RESOLVER_SECOND;
+//		break;
+//
+//	case 1:
+//		player_record->side = RESOLVER_FIRST;
+//		break;
+//
+//	case 2:
+//		player_record->side = RESOLVER_LOW_FIRST;
+//		break;
+//
+//	case 3:
+//		player_record->side = RESOLVER_LOW_SECOND;
+//		break;
+//
+//	case 4:
+//		player_record->side = RESOLVER_FIRST;
+//		break;
+//
+//	case 5:
+//		player_record->side = RESOLVER_SECOND;
+//		break;
+//	}
+//	if (g_ctx.globals.missed_shots[player->EntIndex()] == 5)
+//		g_ctx.globals.missed_shots[player->EntIndex()] = 0;
+//}
 
 
 
@@ -652,26 +628,28 @@ void resolver::resolve_yaw()
 			fake = true;
 			break;
 		case RESOLVER_ZERO:
-			player_record->type = BRUTEFORCE;
+			player_record->type = LAYERS;
 			player_record->side = RESOLVER_LOW_FIRST;
 
 			was_first_bruteforce = false;
 			was_second_bruteforce = false;
 			return;
 		case RESOLVER_FIRST:
-			player_record->type = BRUTEFORCE;
-			player_record->side = was_second_bruteforce ? RESOLVER_ZERO : RESOLVER_SECOND;
+			player_record->type = TRACE;
+			player_record->side = RESOLVER_LOW_SECOND;
 
-			was_first_bruteforce = true;
+			was_first_bruteforce = false;
+			was_second_bruteforce = false;
 			return;
 		case RESOLVER_SECOND:
-			player_record->type = BRUTEFORCE;
-			player_record->side = was_first_bruteforce ? RESOLVER_ZERO : RESOLVER_FIRST;
+			player_record->type = DIRECTIONAL;
+			player_record->side = RESOLVER_LOW_SECOND_20;
 
-			was_second_bruteforce = true;
+			was_first_bruteforce = false;
+			was_second_bruteforce = false;
 			return;
 		case RESOLVER_LOW_FIRST:
-			player_record->type = BRUTEFORCE;
+			player_record->type = ORIGINAL;
 			player_record->side = RESOLVER_LOW_SECOND;
 			return;
 		case RESOLVER_LOW_SECOND:
@@ -718,7 +696,7 @@ void resolver::resolve_yaw()
 	if (player->m_vecVelocity().Length2D() > 50)
 		records.movinglby[player->EntIndex()] = animstate->m_flGoalFeetYaw;
 
-	if (player->m_vecVelocity().Length2D() > 53)
+	if (player->m_vecVelocity().Length2D() > 50)
 	{
 		records.movinglby[player->EntIndex()] = animstate->m_flGoalFeetYaw;
 	}
@@ -730,12 +708,12 @@ void resolver::resolve_yaw()
 	if (animstate->m_velocity > 0.1f || fabs(animstate->flUpVelocity) > 100.f)
 		valid_lby = animstate->m_flTimeSinceStartedMoving < 0.22f;
 
-	auto spread = m_cvar()->FindVar("weapon_accuracy_nospread")->GetInt();
+	/*auto spread = m_cvar()->FindVar("weapon_accuracy_nospread")->GetInt();
 	if (spread == 1)
 	{
 		NoSpreadResolver();
 		return;
-	}
+	}*/
 
 	if (player->m_vecVelocity().Length2D() > 235 || !player->m_fFlags() & FL_ONGROUND)
 		player_record->side = RESOLVER_ORIGINAL;
@@ -752,12 +730,12 @@ void resolver::resolve_yaw()
 		if (g_ctx.globals.missed_shots[player->EntIndex()])
 			delta = -delta;
 
-		if (delta > 29.0f)
+		if (delta > 35.0f)
 		{
 			player_record->type = LBY;
 			player_record->side = RESOLVER_FIRST;
 		}
-		else if (delta < -29.0f)
+		else if (delta < -35.0f)
 		{
 			player_record->type = LBY;
 			player_record->side = RESOLVER_SECOND;
