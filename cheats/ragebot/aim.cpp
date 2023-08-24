@@ -101,7 +101,7 @@ void aim::automatic_revolver(CUserCmd* cmd)
 		{
 			// bruh why using m_flNextSecondaryAttack if need m_flPostponeFireReadyTime.
 			if (g_ctx.globals.weapon->m_flPostponeFireReadyTime() <= server_time)
-				r8cock_time = server_time + TICKS_TO_TIME(13); // fix to 128 tickrate credits aimware.
+				r8cock_time = server_time + TICKS_TO_TIME(14); // fix to 128 tickrate credits aimware.
 			else
 				cmd->m_buttons |= IN_ATTACK2;
 		}
@@ -110,7 +110,7 @@ void aim::automatic_revolver(CUserCmd* cmd)
 	}
 	else
 	{
-		r8cock_time = server_time + TICKS_TO_TIME(13); // fix to 128 tickrate credits aimware.
+		r8cock_time = server_time + TICKS_TO_TIME(14); // fix to 128 tickrate credits aimware.
 		cmd->m_buttons &= ~IN_ATTACK;
 	}
 
