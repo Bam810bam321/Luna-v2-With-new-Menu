@@ -59,8 +59,8 @@
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</IntDir>
     <ExecutablePath>$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);$(ExecutablePath);$(DXSDK_DIR)Utilities\bin\x86</ExecutablePath>
-    <IncludePath>C:\Users\Guddie\Documents\GitHub\Luna-v2-With-new-Menu\ImGui\win32;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;D:\June 2010 SDK\Include;D:\steam_sdk;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)\UI\freetype\include;$(SolutionDir)\lua\lua\src;$(SolutionDir);$(SolutionDir)\lua;C:\Users\Blake\Desktop\Include;C:\Users\Blake\Desktop\imgui-master</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;D:\June 2010 SDK\Lib\x86;$(SolutionDir)\Lua;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(LibraryPath);$(DXSDK_DIR)Lib\x86;$(SolutionDir)\UI\freetype\objs;$(SolutionDir)\detours;C:\Users\Blake\Desktop\libarys</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;D:\June 2010 SDK\Include;D:\steam_sdk;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath);$(DXSDK_DIR)Include;$(SolutionDir)\UI\freetype\include;$(SolutionDir)\lua\lua\src;$(SolutionDir);$(SolutionDir)\lua;C:\Users\Blake\Desktop\Include;C:\Users\Blake\Desktop\imgui-master</IncludePath>
+    <LibraryPath>C:\Users\Guddie\Documents\GitHub\Luna-v2-With-new-Menu\ImGui\win32;C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;D:\June 2010 SDK\Lib\x86;$(SolutionDir)\Lua;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(LibraryPath);$(DXSDK_DIR)Lib\x86;$(SolutionDir)\UI\freetype\objs;$(SolutionDir)\detours;C:\Users\Blake\Desktop\libarys</LibraryPath>
     <TargetName>Legendware</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

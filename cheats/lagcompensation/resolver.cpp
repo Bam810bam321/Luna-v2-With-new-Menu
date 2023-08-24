@@ -22,7 +22,7 @@ int DetectStand(player_t* player)
 
 	filter.pSkip = player;
 	src3D = player->get_shoot_position();
-	dst3D = src3D + (forward * 384); //Might want to experiment with other numbers, incase you don't know what the number does, its how far the trace will go. Lower = shorter.
+	dst3D = src3D + (forward * 486); //Might want to experiment with other numbers, incase you don't know what the number does, its how far the trace will go. Lower = shorter.
 
 	ray.Init(src3D, dst3D);
 	m_trace()->TraceRay(ray, MASK_SHOT, &filter, &tr);
