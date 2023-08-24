@@ -430,11 +430,53 @@ static char __fastcall newFunctionMaterialSystemBypass(void* thisPointer, void* 
 {
 	return 1;
 }
+using eye_angle_fix = Vector * (__thiscall*)(void*);
+inline eye_angle_fix _yes_fuck;
+
+
+void* pBuildTransformationsEntity;
+Vector vecBuildTransformationsAngles;
+Vector* __fastcall hkGetEyeAngles(void* ecx, void* edx)
+{
+    static int* WantedReturnAddress = (int*)util::FindSignature("client.dll", "8B 55 0C 8B C8 E8 ? ? ? ? 83 C4 08 5E 8B E5");
+
+    static auto oGetEyeAngles = hooks::player_hook->get_func_address <eye_angle_fix>(170);
+
+    if (_ReturnAddress() != WantedReturnAddress)
+        return oGetEyeAngles(ecx);
+
+    if (!ecx || pBuildTransformationsEntity != ecx)
+        return oGetEyeAngles(ecx);
+
+    pBuildTransformationsEntity = nullptr;
+
+    return &vecBuildTransformationsAngles;
+}
+using BuildTransformations = Vector * (__thiscall*)(void*, CStudioHdr* hdr, Vector* pos, Quaternion* q, matrix3x4_t* cameraTransform, int bonemask, byte* computed);
+void __fastcall hkBuildTransformations(void* ecx, void* edx, CStudioHdr* hdr, Vector* pos, Quaternion* q, matrix3x4_t* cameraTransform, int bonemask, byte* computed) {
+
+    static auto oBuildTransformations = hooks::player_hook->get_func_address <BuildTransformations>(190);
+    if (ecx && ((player_t*)ecx)->EntIndex() == m_engine()->GetLocalPlayer()) {
+
+        pBuildTransformationsEntity = ecx;
+        vecBuildTransformationsAngles = ((player_t*)ecx)->GetRenderAngles();
+    }
+    oBuildTransformations(ecx, hdr, pos, q, cameraTransform, bonemask, computed);
+    pBuildTransformationsEntity = nullptr;
+}
+
 
 __forceinline void setup_hooks()
 {
 	fix();
 
+
+	//playerhook fix by drip
+    auto playerhooks = util::FindSignature("client.dll", ("55 8B EC 83 E4 F8 83 EC 18 56 57 8B F9 89 7C")) + 0x47;
+    hooks::player_hook = new vmthook(reinterpret_cast<DWORD**>(playerhooks));
+    hooks::player_hook->hook_function(reinterpret_cast<uintptr_t>(hkBuildTransformations), 190);
+    hooks::player_hook->hook_function(reinterpret_cast<uintptr_t>(hkGetEyeAngles), 170);
+	
 	newFunctionClientDLL_hook = (DWORD)DetourFunction((PBYTE)newFunctionClientDLL, (PBYTE)newFunctionClientBypass);
 	newFunctionEngineDLL_hook = (DWORD)DetourFunction((PBYTE)newFunctionEngineDLL, (PBYTE)newFunctionEngineBypass);
 	newFunctionStudioRenderDLL_hook = (DWORD)DetourFunction((PBYTE)newFunctionStudioRenderDLL, (PBYTE)newFunctionStudioRenderBypass);
