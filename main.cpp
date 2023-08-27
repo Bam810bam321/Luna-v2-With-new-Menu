@@ -204,50 +204,6 @@ bool __stdcall sv_cheatshk() {
 	return sv_cheats->get_func_address<GetBool_t>(13);
 }
 
-using eye_angles_valve = Vector * (__thiscall*)(void*);
-inline eye_angles_valve _eye_angles;
-
-
-Vector* __fastcall hkGetEyeAngles(void* ecx, void* edx)
-{
-	static int* WantedReturnAddress1 = (int*)util::FindSignature(("client.dll"), "8B CE F3 0F 10 00 8B 06 F3 0F 11 45 ? FF 90 ? ? ? ? F3 0F 10 55 ?"); //Update Animations X/Y
-	static int* WantedReturnAddress2 = (int*)util::FindSignature(("client.dll"), "F3 0F 10 55 ? 51 8B 8E ? ? ? ?");                                    //Update Animations X/Y
-	static int* WantedReturnAddress3 = (int*)util::FindSignature(("client.dll"), "8B 55 0C 8B C8 E8 ? ? ? ? 83 C4 08 5E 8B E5");                       //Retarded valve fix
-
-	static auto oGetEyeAngles = _eye_angles;
-
-	if (_ReturnAddress() != WantedReturnAddress1 && _ReturnAddress() != WantedReturnAddress2 && _ReturnAddress() != WantedReturnAddress3)
-		return oGetEyeAngles(ecx);
-
-	if (!ecx || ((player_t*)ecx)->EntIndex() != m_engine()->GetLocalPlayer())
-		return oGetEyeAngles(ecx);
-
-	return &local_animations::get().local_data.real_angles;
-}
-
-__forceinline void setup_render()
-{
-	static auto create_font = [](const char* name, int size, int weight, DWORD flags) -> vgui::HFont
-	{
-		g_ctx.last_font_name = name;
-
-		auto font = m_surface()->FontCreate();
-		m_surface()->SetFontGlyphSet(font, name, size, weight, 0, 0, flags);
-
-		return font;
-	};
-
-	fonts[LOGS] = create_font(crypt_str("Lucida Console"), 10, FW_MEDIUM, FONTFLAG_DROPSHADOW);
-	fonts[ESP] = create_font(crypt_str("Smallest Pixel-7"), 11, FW_MEDIUM, FONTFLAG_OUTLINE);
-	fonts[NAME] = create_font(crypt_str("Verdana"), 12, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
-	fonts[SUBTABWEAPONS] = create_font(crypt_str("undefeated"), 13, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
-	fonts[KNIFES] = create_font(crypt_str("icomoon"), 13, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
-	fonts[GRENADES] = create_font(crypt_str("undefeated"), 20, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
-	fonts[INDICATORFONT] = create_font(crypt_str("Verdana"), 25, FW_HEAVY, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
-	fonts[DAMAGE_MARKER] = create_font(crypt_str("CrashNumberingGothic"), 15, FW_HEAVY, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
-
-	g_ctx.last_font_name.clear();
-}
 
 __forceinline void setup_netvars()
 {
@@ -430,28 +386,29 @@ static char __fastcall newFunctionMaterialSystemBypass(void* thisPointer, void* 
 {
 	return 1;
 }
+
 using eye_angle_fix = Vector * (__thiscall*)(void*);
 inline eye_angle_fix _yes_fuck;
 
 
 void* pBuildTransformationsEntity;
 Vector vecBuildTransformationsAngles;
-//Vector* __fastcall hkGetEyeAngles(void* ecx, void* edx)
-//{
-//    static int* WantedReturnAddress = (int*)util::FindSignature("client.dll", "8B 55 0C 8B C8 E8 ? ? ? ? 83 C4 08 5E 8B E5");
-//
-//    static auto oGetEyeAngles = hooks::player_hook->get_func_address <eye_angle_fix>(170);
-//
-//    if (_ReturnAddress() != WantedReturnAddress)
-//        return oGetEyeAngles(ecx);
-//
-//    if (!ecx || pBuildTransformationsEntity != ecx)
-//        return oGetEyeAngles(ecx);
-//
-//    pBuildTransformationsEntity = nullptr;
-//
-//    return &vecBuildTransformationsAngles;
-//}
+Vector* __fastcall hkGetEyeAngles(void* ecx, void* edx)
+{
+    static int* WantedReturnAddress = (int*)util::FindSignature("client.dll", "8B 55 0C 8B C8 E8 ? ? ? ? 83 C4 08 5E 8B E5");
+
+    static auto oGetEyeAngles = hooks::player_hook->get_func_address <eye_angle_fix>(170);
+
+    if (_ReturnAddress() != WantedReturnAddress)
+        return oGetEyeAngles(ecx);
+
+    if (!ecx || pBuildTransformationsEntity != ecx)
+        return oGetEyeAngles(ecx);
+
+    pBuildTransformationsEntity = nullptr;
+
+    return &vecBuildTransformationsAngles;
+}
 using BuildTransformations = Vector * (__thiscall*)(void*, CStudioHdr* hdr, Vector* pos, Quaternion* q, matrix3x4_t* cameraTransform, int bonemask, byte* computed);
 void __fastcall hkBuildTransformations(void* ecx, void* edx, CStudioHdr* hdr, Vector* pos, Quaternion* q, matrix3x4_t* cameraTransform, int bonemask, byte* computed) {
 
@@ -464,6 +421,7 @@ void __fastcall hkBuildTransformations(void* ecx, void* edx, CStudioHdr* hdr, Ve
     oBuildTransformations(ecx, hdr, pos, q, cameraTransform, bonemask, computed);
     pBuildTransformationsEntity = nullptr;
 }
+
 
 
 __forceinline void setup_hooks()
