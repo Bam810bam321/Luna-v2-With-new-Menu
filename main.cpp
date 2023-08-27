@@ -203,7 +203,29 @@ bool __stdcall sv_cheatshk() {
 
 	return sv_cheats->get_func_address<GetBool_t>(13);
 }
+__forceinline void setup_render()
+{
+	static auto create_font = [](const char* name, int size, int weight, DWORD flags) -> vgui::HFont
+	{
+		g_ctx.last_font_name = name;
 
+		auto font = m_surface()->FontCreate();
+		m_surface()->SetFontGlyphSet(font, name, size, weight, 0, 0, flags);
+
+		return font;
+	};
+
+	fonts[LOGS] = create_font(crypt_str("Lucida Console"), 10, FW_MEDIUM, FONTFLAG_DROPSHADOW);
+	fonts[ESP] = create_font(crypt_str("Smallest Pixel-7"), 11, FW_MEDIUM, FONTFLAG_OUTLINE);
+	fonts[NAME] = create_font(crypt_str("Verdana"), 12, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
+	fonts[SUBTABWEAPONS] = create_font(crypt_str("undefeated"), 13, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
+	fonts[KNIFES] = create_font(crypt_str("icomoon"), 13, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
+	fonts[GRENADES] = create_font(crypt_str("undefeated"), 20, FW_MEDIUM, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
+	fonts[INDICATORFONT] = create_font(crypt_str("Verdana"), 25, FW_HEAVY, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
+	fonts[DAMAGE_MARKER] = create_font(crypt_str("CrashNumberingGothic"), 15, FW_HEAVY, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+
+	g_ctx.last_font_name.clear();
+}
 
 __forceinline void setup_netvars()
 {
