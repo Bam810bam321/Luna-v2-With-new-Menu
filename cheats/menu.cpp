@@ -980,7 +980,7 @@ void c_menu::render2(bool is_open)
 		static auto type = 0;
 		static auto player = 0;
 
-		// hey stewen, what r u doing there? he, hm heee, DRUGS
+		
 		static bool drugs = false;
 
 		// some animation logic(switch)
@@ -2064,9 +2064,9 @@ void c_menu::render2(bool is_open)
 							ImGui::Checkbox(crypt_str("Automatic wall"), &g_cfg.ragebot.autowall);
 							ImGui::Checkbox(crypt_str("Zeus bot"), &g_cfg.ragebot.zeus_bot);
 							ImGui::Checkbox(crypt_str("Knife bot"), &g_cfg.ragebot.knife_bot);
-							ImGui::Checkbox(crypt_str("Anti-aim correction"), &g_cfg.ragebot.antiaim_correction);
+							/*ImGui::Checkbox(crypt_str("Anti-aim correction"), &g_cfg.ragebot.antiaim_correction);
 							if (g_cfg.ragebot.antiaim_correction)
-								ImGui::Checkbox(crypt_str("Crackhead resolver [BETA]"), &g_cfg.ragebot.exploit_antiaim_correction);
+								ImGui::Checkbox(crypt_str("Crackhead resolver [BETA]"), &g_cfg.ragebot.exploit_antiaim_correction);*/
 						}
 					}
 					e_elements::end_child();

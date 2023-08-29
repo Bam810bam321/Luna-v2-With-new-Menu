@@ -1315,40 +1315,42 @@ bool misc::double_tap(CUserCmd* m_pcmd)
 {
 	double_tap_enabled = true;
 
-	static auto recharge_rapid_fire = false;
-	static bool firing_dt = false;
+	static auto recharge_double_tap = false;
+	static auto last_double_tap = 0;
 
-	if (recharge_rapid_fire)
+	if (recharge_double_tap)
 	{
-		recharge_rapid_fire = false;
+		recharge_double_tap = false;
 		recharging_double_tap = true;
-
 		g_ctx.globals.ticks_allowed = 0;
-		g_ctx.globals.tickbase_shift = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
 		return false;
 	}
 
-	auto max_tickbase_shift = g_ctx.globals.weapon->get_max_tickbase_shift();
-
 	if (recharging_double_tap)
 	{
-		if (can_shift_shot(max_tickbase_shift) && !aim::get().should_stop)
+		auto recharge_time = g_ctx.globals.weapon->can_double_tap() ? TIME_TO_TICKS(0.50f) : TIME_TO_TICKS(0.9f);
+
+		if (!aim::get().should_stop && fabs(g_ctx.globals.fixed_tickbase - last_double_tap) > recharge_time)
 		{
+			last_double_tap = 0;
+
 			recharging_double_tap = false;
 			double_tap_key = true;
-			firing_dt = false;
+			hide_shots_key = false;
 		}
 		else if (m_pcmd->m_buttons & IN_ATTACK)
-			firing_dt = true;
+			last_double_tap = g_ctx.globals.fixed_tickbase;
 	}
 
 	if (!g_cfg.ragebot.enable)
 	{
 		double_tap_enabled = false;
 		double_tap_key = false;
-
 		g_ctx.globals.ticks_allowed = 0;
-		g_ctx.globals.tickbase_shift = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
 		return false;
 	}
 
@@ -1356,42 +1358,40 @@ bool misc::double_tap(CUserCmd* m_pcmd)
 	{
 		double_tap_enabled = false;
 		double_tap_key = false;
-
 		g_ctx.globals.ticks_allowed = 0;
-		g_ctx.globals.tickbase_shift = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
 		return false;
 	}
-
-	static bool was_in_dt = false;
 
 	if (g_cfg.ragebot.double_tap_key.key <= KEY_NONE || g_cfg.ragebot.double_tap_key.key >= KEY_MAX)
 	{
 		double_tap_enabled = false;
 		double_tap_key = false;
-
 		g_ctx.globals.ticks_allowed = 0;
-		g_ctx.globals.tickbase_shift = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
 		return false;
 	}
 
 	if (double_tap_key && g_cfg.ragebot.double_tap_key.key != g_cfg.antiaim.hide_shots_key.key)
 		hide_shots_key = false;
 
-	if (!double_tap_key || g_ctx.local()->m_bGunGameImmunity() || g_ctx.local()->m_fFlags() & FL_FROZEN || g_ctx.globals.fakeducking)
+	if (!double_tap_key)
 	{
 		double_tap_enabled = false;
-
-		if (!firing_dt && was_in_dt)
-		{
-			g_ctx.globals.trigger_teleport = true;
-			g_ctx.globals.teleport_amount = max_tickbase_shift;
-
-			was_in_dt = false;
-		}
-
 		g_ctx.globals.ticks_allowed = 0;
-		g_ctx.globals.tickbase_shift = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
+		return false;
+	}
 
+	if (g_ctx.local()->m_bGunGameImmunity() || g_ctx.local()->m_fFlags() & FL_FROZEN) //-V807
+	{
+		double_tap_enabled = false;
+		g_ctx.globals.ticks_allowed = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
 		return false;
 	}
 
@@ -1399,23 +1399,30 @@ bool misc::double_tap(CUserCmd* m_pcmd)
 	{
 		double_tap_enabled = false;
 		g_ctx.globals.ticks_allowed = 0;
-		g_ctx.globals.tickbase_shift = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
+		return false;
+	}
+
+	if (g_ctx.globals.fakeducking)
+	{
+		double_tap_enabled = false;
+		g_ctx.globals.ticks_allowed = 0;
+		g_ctx.globals.new_dt.charge_ticks = 0;
+		g_ctx.globals.next_tickbase_shift = 0;
 		return false;
 	}
 
 	if (antiaim::get().freeze_check)
 		return true;
 
-	was_in_dt = true;
-
-	if (!g_ctx.globals.weapon->is_grenade() && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_TASER
-		&& g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_REVOLVER
-		&& (m_pcmd->m_buttons & IN_ATTACK || m_pcmd->m_buttons & IN_ATTACK2 && g_ctx.globals.weapon->is_knife())) //-V648
+	auto max_tickbase_shift = g_ctx.globals.weapon->get_max_tickbase_shift();
+	if (!g_ctx.globals.weapon->is_grenade() && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_C4 && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_HEALTHSHOT && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_TASER && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_REVOLVER && !g_ctx.globals.weapon->is_knife() && g_ctx.send_packet && (m_pcmd->m_buttons & IN_ATTACK || m_pcmd->m_buttons & IN_ATTACK2 && g_ctx.globals.weapon->is_knife())) //-V648
 	{
 		auto next_command_number = m_pcmd->m_command_number + 1;
 		auto user_cmd = m_input()->GetUserCmd(next_command_number);
 
-		memcpy(user_cmd, m_pcmd, sizeof(CUserCmd));
+		memcpy(user_cmd, m_pcmd, sizeof(CUserCmd)); //-V598
 		user_cmd->m_command_number = next_command_number;
 
 		util::copy_command(user_cmd, max_tickbase_shift);
@@ -1426,14 +1433,13 @@ bool misc::double_tap(CUserCmd* m_pcmd)
 			g_ctx.globals.double_tap_aim_check = true;
 		}
 
-		recharge_rapid_fire = true;
+		recharge_double_tap = true;
 		double_tap_enabled = false;
 		double_tap_key = false;
-
-		g_ctx.send_packet = true;
-		firing_dt = true;
+		last_double_tap = g_ctx.globals.fixed_tickbase;
+		g_ctx.globals.tickbase_shift = max_tickbase_shift;
 	}
-	else if (!g_ctx.globals.weapon->is_grenade() && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_TASER && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_REVOLVER)
+	else if (!g_ctx.globals.weapon->is_knife() && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_C4 && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_HEALTHSHOT && !g_ctx.globals.weapon->is_grenade() && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_TASER && g_ctx.globals.weapon->m_iItemDefinitionIndex() != WEAPON_REVOLVER)
 		g_ctx.globals.tickbase_shift = max_tickbase_shift;
 
 	return true;

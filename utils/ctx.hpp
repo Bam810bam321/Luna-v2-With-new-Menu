@@ -104,6 +104,14 @@ public:
 		bool should_update_weather = false;
 
 		int shift_time = 0;
+		struct new_dt_t
+		{
+			int next_tickbase_shift = 0;
+			int tickbase_shift = 0;
+			int charge_ticks = 0;
+			bool recharging = false;
+			bool shifting = false;
+		}new_dt;
 		int framerate = 0;
 		int ping = 0;
 		int ticks_allowed = 0;

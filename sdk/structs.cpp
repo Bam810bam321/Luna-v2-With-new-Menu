@@ -341,6 +341,7 @@ int weapon_t::get_max_tickbase_shift()
 			break;
 		case WEAPON_FIVESEVEN:
 		case WEAPON_GLOCK:
+			max_tickbase_shift = 7;
 		case WEAPON_P250:
 		case WEAPON_SG553:
 			max_tickbase_shift = 8;
@@ -353,9 +354,11 @@ int weapon_t::get_max_tickbase_shift()
 			max_tickbase_shift = 15;
 			break;
 		case WEAPON_DEAGLE:
-			max_tickbase_shift = 14;
+			max_tickbase_shift = 13;
 			break;
 		case WEAPON_G3SG1:
+			max_tickbase_shift = 14;
+			break;
 		case WEAPON_SCAR20:
 			max_tickbase_shift = 14;
 			break;

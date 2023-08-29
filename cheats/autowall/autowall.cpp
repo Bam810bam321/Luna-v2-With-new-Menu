@@ -30,212 +30,163 @@ bool autowall::is_breakable_entity(IClientEntity* e)
 
 void autowall::scale_damage(player_t* e, CGameTrace& enterTrace, weapon_info_t* weaponData, float& currentDamage)
 {
-	if (!e->is_player())
-		return;
-
-	auto is_armored = [&]()->bool
-	{
-		auto has_helmet = e->m_bHasHelmet();
-		auto armor_value = e->m_ArmorValue();
-
-		if (armor_value > 0)
+	const auto is_armored = [&]() -> bool
 		{
-			switch (enterTrace.hitgroup)
+			if (e->m_ArmorValue() > 0.f)
 			{
-			case HITGROUP_GENERIC:
-			case HITGROUP_CHEST:
-			case HITGROUP_STOMACH:
-			case HITGROUP_LEFTARM:
-			case HITGROUP_RIGHTARM:
-			case HITGROUP_LEFTLEG:
-			case HITGROUP_RIGHTLEG:
-			case HITGROUP_GEAR:
-				return true;
-			case HITGROUP_HEAD:
-				return has_helmet || e->m_bHasHeavyArmor();
-			default:
-				return e->m_bHasHeavyArmor();
+				switch (enterTrace.hitgroup)
+				{
+				case HITGROUP_GENERIC:
+				case HITGROUP_CHEST:
+				case HITGROUP_STOMACH:
+				case HITGROUP_LEFTARM:
+				case HITGROUP_RIGHTARM:
+					return true;
+				case HITGROUP_HEAD:
+					return e->m_bHasHelmet();
+				default:
+					break;
+				}
 			}
-		}
 
-		return false;
-	};
-
-	static auto mp_damage_scale_ct_head = m_cvar()->FindVar(crypt_str("mp_damage_scale_ct_head")); 
-	static auto mp_damage_scale_t_head = m_cvar()->FindVar(crypt_str("mp_damage_scale_t_head"));
-
-	static auto mp_damage_scale_ct_body = m_cvar()->FindVar(crypt_str("mp_damage_scale_ct_body"));
-	static auto mp_damage_scale_t_body = m_cvar()->FindVar(crypt_str("mp_damage_scale_t_body"));
-
-	auto head_scale = e->m_iTeamNum() == 3 ? mp_damage_scale_ct_head->GetFloat() : mp_damage_scale_t_head->GetFloat();
-	auto body_scale = e->m_iTeamNum() == 3 ? mp_damage_scale_ct_body->GetFloat() : mp_damage_scale_t_body->GetFloat();
-
-	auto armor_heavy = e->m_bHasHeavyArmor();
-	auto armor_value = (float)e->m_ArmorValue();
-
-	if (armor_heavy)
-		head_scale *= 0.5f;
+			return false;
+		};
 
 	switch (enterTrace.hitgroup)
 	{
 	case HITGROUP_HEAD:
-		currentDamage *= 4.0f * head_scale;
+		if (e->m_bHasHeavyArmor())
+			currentDamage = currentDamage * .5f;
+		else
+			currentDamage *= 4.f;
 		break;
 	case HITGROUP_STOMACH:
-		currentDamage *= 1.25f * body_scale;
-		break;
-	case HITGROUP_CHEST:
-	case HITGROUP_LEFTARM:
-	case HITGROUP_RIGHTARM:
-	case HITGROUP_GEAR:
-		currentDamage *= body_scale;
+		currentDamage *= 1.25f;
 		break;
 	case HITGROUP_LEFTLEG:
 	case HITGROUP_RIGHTLEG:
-		currentDamage *= 0.75f * body_scale;
+		currentDamage *= .75f;
+		break;
+	default:
 		break;
 	}
 
 	if (is_armored())
 	{
-		auto armor_scale = 1.0f;
-		auto armor_ratio = weaponData->flArmorRatio * 0.5f;
-		auto armor_bonus_ratio = 0.5f;
+		auto modifier = 1.f, armor_bonus_ratio = .5f, armor_ratio = weaponData->flArmorRatio * .5f;
 
-		if (armor_heavy)
+		if (e->m_bHasHeavyArmor())
 		{
-			armor_ratio *= 0.2f;
-			armor_bonus_ratio = 0.33f;
-			armor_scale = 0.25f;
+			armor_bonus_ratio = 0.5f;
+			armor_ratio = weaponData->flArmorRatio * 0.5f;
+			modifier = 1.f;
 		}
 
 		auto new_damage = currentDamage * armor_ratio;
-		auto estiminated_damage = (currentDamage - currentDamage * armor_ratio) * armor_scale * armor_bonus_ratio;
 
-		if (estiminated_damage > armor_value)
-			new_damage = currentDamage - armor_value / armor_bonus_ratio;
+		if (e->m_bHasHeavyArmor())
+			new_damage = new_damage * 0.85000002f;
+
+		if ((currentDamage - currentDamage * armor_ratio) * (modifier * armor_bonus_ratio) > e->m_ArmorValue())
+			new_damage = currentDamage - e->m_ArmorValue() / armor_bonus_ratio;
 
 		currentDamage = new_damage;
 	}
+
+	return;
+}
+void TraceLine(Vector& absStart, const Vector& absEnd, unsigned int mask, player_t* ignore, CGameTrace* ptr)
+{
+	Ray_t ray;
+	ray.Init(absStart, absEnd);
+	CTraceFilter filter;
+	filter.pSkip = ignore;
+
+	m_trace()->TraceRay(ray, mask, &filter, ptr);
 }
 
 bool autowall::trace_to_exit(CGameTrace& enterTrace, CGameTrace& exitTrace, Vector startPosition, const Vector& direction)
 {
-	auto enter_point_contents = 0;
-	auto point_contents = 0;
+	static ConVar* sv_clip_penetration_traces_to_players = m_cvar()->FindVar(crypt_str("sv_clip_penetration_traces_to_players"));
 
-	auto is_window = 0;
-	auto flag = 0;
+	Vector          new_end, out;
+	float           dist = 0.0f;
+	int                iterations = 23;
+	int                first_contents = 0;
+	int             contents;
+	Ray_t r{};
 
-	auto fDistance = 0.0f;
-	Vector start, end;
-
-	do
+	while (1)
 	{
-		fDistance += 4.0f;
+		iterations--;
 
-		end = startPosition + direction * fDistance;
-		start = end - direction * 4.0f;
+		if (iterations <= 0 || dist > 90.f)
+			break;
 
-		if (!enter_point_contents)
-		{
-			enter_point_contents = m_trace()->GetPointContents(end, 0x4600400B);
-			point_contents = enter_point_contents;
-		}
-		else
-			point_contents = m_trace()->GetPointContents(end, 0x4600400B);
+		dist += 4.0f;
+		out = startPosition + (direction * dist);
 
-		if (point_contents & MASK_SHOT_HULL && (!(point_contents & CONTENTS_HITBOX) || enter_point_contents == point_contents))
+		contents = m_trace()->GetPointContents(out, 0x4600400B, nullptr);
+
+		if (first_contents == -1)
+			first_contents = contents;
+
+		if (contents & 0x600400B && (!(contents & CONTENTS_HITBOX) || first_contents == contents))
 			continue;
 
-		static auto trace_filter_simple = util::FindSignature(crypt_str("client.dll"), crypt_str("55 8B EC 83 E4 F0 83 EC 7C 56 52")) + 0x3D;
+		new_end = out - (direction * 4.f);
 
-		uint32_t filter_[4] =
+		TraceLine(out, new_end, 0x4600400B, nullptr, &exitTrace);
+
+		if (exitTrace.startsolid && (exitTrace.surface.flags & SURF_HITBOX) != 0)
 		{
-			*(uint32_t*)(trace_filter_simple),
-			(uint32_t)g_ctx.local(),
-			0,
-			0
-		};
-
-		util::trace_line(end, start, MASK_SHOT_HULL | CONTENTS_HITBOX, (CTraceFilter*)filter_, &exitTrace); //-V641
-
-		if (exitTrace.startsolid && exitTrace.surface.flags & SURF_HITBOX)
-		{
-			CTraceFilter filter;
-			filter.pSkip = exitTrace.hit_entity;
-
-			filter_[1] = (uint32_t)exitTrace.hit_entity;
-			util::trace_line(end, startPosition, MASK_SHOT_HULL, (CTraceFilter*)filter_, &exitTrace); //-V641
+			TraceLine(out, startPosition, MASK_SHOT_HULL, (player_t*)exitTrace.hit_entity, &exitTrace);
 
 			if (exitTrace.DidHit() && !exitTrace.startsolid)
+			{
+				out = exitTrace.endpos;
 				return true;
-
+			}
 			continue;
 		}
 
-		auto name = (int*)enterTrace.surface.name; //-V206
-
-		if (name)
-		{
-			if (*name == 1936744813 && name[1] == 1601397551 && name[2] == 1768318575 && name[3] == 1731159395 && name[4] == 1936941420 && name[5] == 1651668271 && name[6] == 1734307425 && name[7] == 1936941420)
-				is_window = 1;
-			else
-			{
-				is_window = 0;
-
-				if (*name != 1936744813)
-					goto LABEL_34;
-			}
-
-			if (name[1] == 1600480303 && name[2] == 1701536108 && name[3] == 1634494255 && name[4] == 1731162995 && name[5] == 1936941420)
-			{
-				flag = 1;
-
-			LABEL_35:
-				if (is_window || flag)
-				{
-					exitTrace = enterTrace;
-					exitTrace.endpos = end + direction;
-					return true;
-				}
-
-				goto LABEL_37;
-			}
-		LABEL_34:
-			flag = 0;
-			goto LABEL_35;
-		}
-
-	LABEL_37:
 		if (!exitTrace.DidHit() || exitTrace.startsolid)
 		{
-			if (enterTrace.hit_entity && enterTrace.hit_entity->EntIndex() && is_breakable_entity(enterTrace.hit_entity))
+			if (enterTrace.hit_entity != m_entitylist()->GetClientEntity(0))
 			{
-				exitTrace = enterTrace;
-				exitTrace.endpos = startPosition + direction;
-				return true;
+				if (exitTrace.hit_entity && is_breakable_entity(exitTrace.hit_entity))
+				{
+					exitTrace.surface.surfaceProps = enterTrace.surface.surfaceProps;
+					exitTrace.endpos = startPosition + direction;
+					return true;
+				}
 			}
 
 			continue;
 		}
 
-		if (exitTrace.surface.flags & SURF_NODRAW)
+		if ((exitTrace.surface.flags & 0x80u) != 0)
 		{
-			if (is_breakable_entity(exitTrace.hit_entity) && is_breakable_entity(enterTrace.hit_entity))
+			if (enterTrace.hit_entity && is_breakable_entity(enterTrace.hit_entity) && exitTrace.hit_entity && is_breakable_entity(exitTrace.hit_entity))
+			{
+				out = exitTrace.endpos;
 				return true;
+			}
 
-			if (!(enterTrace.surface.flags & SURF_NODRAW))
+			if (!(enterTrace.surface.flags & 0x80u))
 				continue;
 		}
 
-		if (exitTrace.plane.normal.Dot(direction) <= 1.0)
+		if (exitTrace.plane.normal.Dot(direction) <= 1.f)
+		{
+			out -= direction * (exitTrace.fraction * 4.0f);
 			return true;
-
-	} 	while (fDistance <= 90.0f);
+		}
+	}
 
 	return false;
 }
+
 
 bool autowall::handle_bullet_penetration(weapon_info_t* weaponData, CGameTrace& enterTrace, Vector& eyePosition, const Vector& direction, int& possibleHitsRemaining, float& currentDamage, float penetrationPower, float ff_damage_reduction_bullets, float ff_damage_bullet_penetration, bool draw_impact)
 {
@@ -316,6 +267,87 @@ bool autowall::handle_bullet_penetration(weapon_info_t* weaponData, CGameTrace& 
 
 	return true;
 }
+
+float autowall::handle_bullet_penetration2(weapon_info_t* weaponData, CGameTrace& enterTrace, Vector& eyePosition, const Vector& direction, int& possibleHitsRemaining, float& currentDamage, float penetrationPower, float ff_damage_reduction_bullets, float ff_damage_bullet_penetration, bool draw_impact)
+{
+	if (weaponData->flPenetration <= 0.0f)
+		return false;
+
+	if (possibleHitsRemaining <= 0)
+		return false;
+
+	auto contents_grate = enterTrace.contents & CONTENTS_GRATE;
+	auto surf_nodraw = enterTrace.surface.flags & SURF_NODRAW;
+
+	auto enterSurfaceData = m_physsurface()->GetSurfaceData(enterTrace.surface.surfaceProps);
+	auto enter_material = enterSurfaceData->game.material;
+
+	auto is_solid_surf = enterTrace.contents >> 3 & CONTENTS_SOLID;
+	auto is_light_surf = enterTrace.surface.flags >> 7 & SURF_LIGHT;
+
+	trace_t exit_trace;
+
+	if (!trace_to_exit(enterTrace, exit_trace, enterTrace.endpos, direction) && !(m_trace()->GetPointContents(enterTrace.endpos, MASK_SHOT_HULL) & MASK_SHOT_HULL))
+		return false;
+
+	auto enter_penetration_modifier = enterSurfaceData->game.flPenetrationModifier;
+	auto exit_surface_data = m_physsurface()->GetSurfaceData(exit_trace.surface.surfaceProps);
+
+	if (!exit_surface_data)
+		return false;
+
+	auto exit_material = exit_surface_data->game.material;
+	auto exit_penetration_modifier = exit_surface_data->game.flPenetrationModifier;
+
+	auto combined_damage_modifier = 0.16f;
+	auto combined_penetration_modifier = (enter_penetration_modifier + exit_penetration_modifier) * 0.5f;
+
+	if (enter_material == CHAR_TEX_GLASS || enter_material == CHAR_TEX_GRATE)
+	{
+		combined_penetration_modifier = 3.0f;
+		combined_damage_modifier = 0.05f;
+	}
+	else if (contents_grate || surf_nodraw)
+		combined_penetration_modifier = 1.0f;
+	else if (enter_material == CHAR_TEX_FLESH && ((player_t*)enterTrace.hit_entity)->m_iTeamNum() == g_ctx.local()->m_iTeamNum() && !ff_damage_reduction_bullets)
+	{
+		if (!ff_damage_bullet_penetration) //-V550
+			return false;
+
+		combined_penetration_modifier = ff_damage_bullet_penetration;
+		combined_damage_modifier = 0.16f;
+	}
+
+	if (enter_material == exit_material)
+	{
+		if (exit_material == CHAR_TEX_WOOD || exit_material == CHAR_TEX_CARDBOARD)
+			combined_penetration_modifier = 3.0f;
+		else if (exit_material == CHAR_TEX_PLASTIC)
+			combined_penetration_modifier = 2.0f;
+	}
+
+	auto penetration_modifier = std::fmaxf(0.0f, 1.0f / combined_penetration_modifier);
+	auto penetration_distance = (exit_trace.endpos - enterTrace.endpos).Length();
+
+	penetration_distance = penetration_distance * penetration_distance * penetration_modifier * 0.041666668f;
+
+	auto damage_modifier = max(0.0f, 3.0f / weaponData->flPenetration * 1.25f) * penetration_modifier * 3.0f + currentDamage * combined_damage_modifier + penetration_distance;
+	auto damage_lost = max(0.0f, damage_modifier);
+
+	if (damage_lost > currentDamage)
+		return false;
+
+	currentDamage -= damage_lost;
+
+	if (currentDamage < 1.0f)
+		return false;
+
+	eyePosition = exit_trace.endpos;
+	--possibleHitsRemaining;
+
+	return currentDamage - damage_lost;
+}
+
 
 bool autowall::fire_bullet(weapon_t* pWeapon, Vector& direction, bool& visible, float& currentDamage, int& hitbox, IClientEntity* e, float length, const Vector& pos)
 {

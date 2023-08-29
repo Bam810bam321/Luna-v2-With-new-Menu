@@ -474,9 +474,6 @@ __forceinline void setup_hooks()
 	static auto setupbones = (DWORD)(util::FindSignature(crypt_str("client.dll"), g_ctx.signatures.at(10).c_str()));
 	hooks::original_setupbones = (DWORD)DetourFunction((PBYTE)setupbones, (PBYTE)hooks::hooked_setupbones);
 
-	static auto eye_angles = (DWORD)(util::FindSignature(crypt_str("client.dll"), "56 8B F1 85 F6 74 32"));
-	_eye_angles = (eye_angles_valve)DetourFunction((PBYTE)eye_angles, (PBYTE)hkGetEyeAngles);
-
 	static auto clmove = (DWORD)(util::FindSignature(crypt_str("engine.dll"), crypt_str("55 8B EC 81 EC 64 01 00 00 53 56 8A F9")));
 	hooks::original_clmove = (DWORD)DetourFunction((PBYTE)clmove, (PBYTE)hooks::hooked_clmove);
 
