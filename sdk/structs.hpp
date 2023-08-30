@@ -421,6 +421,7 @@ public:
     NETVAR(bool, m_bSpotted, crypt_str("CBaseEntity"), crypt_str("m_bSpotted"));
     NETVAR(int, m_vphysicsCollisionState, crypt_str("CBasePlayer"), crypt_str("m_vphysicsCollisionState"));
     NETVAR(bool, m_bIsWalking, crypt_str("CCSPlayer"), crypt_str("m_bIsWalking"));
+    NETVAR(float, m_flModelScale, crypt_str("CBaseAnimating"), crypt_str("m_flModelScale"));
     NETVAR(bool, m_bIsDefusing, crypt_str("CCSPlayer"), crypt_str("m_bIsDefusing"));
     VIRTUAL(think(void), 138, void(__thiscall*)(void*));
     VIRTUAL(pre_think(void), 317, void(__thiscall*)(void*));
