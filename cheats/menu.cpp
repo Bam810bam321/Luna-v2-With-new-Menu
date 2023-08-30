@@ -1128,6 +1128,7 @@ void c_menu::render2(bool is_open)
 
 								ImGui::Checkbox(crypt_str("Pitch zero on land"), &g_cfg.antiaim.pitch_zero_on_land);
 								ImGui::Checkbox(crypt_str("Static legs in air"), &g_cfg.antiaim.static_legs);
+								ImGui::Checkbox(crypt_str("Meme model"), &g_cfg.misc.rifkmodel);
 								ImGui::Checkbox(crypt_str("Freestanding"), &g_cfg.antiaim.freestand);
 
 								ImGui::Combo(crypt_str("Leg movement"), &g_cfg.misc.leg_movement, leg_movement, ARRAYSIZE(leg_movement));
