@@ -701,6 +701,7 @@ struct Config
 
 	struct Misc_t
 	{
+bool rifkmodel;
 		key_bind thirdperson_toggle;
 		bool thirdperson_when_spectating;
 		int thirdperson_distance;
