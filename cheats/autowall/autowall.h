@@ -19,7 +19,7 @@ struct fire_bullet_data
 class autowall : public singleton <autowall>
 {
 public:
-	static constexpr float LIMB_MULTIPLIER = 0.65f;
+	static constexpr float LIMB_MULTIPLIER = 0.55f;
 
 	struct returninfo_t
 	{
