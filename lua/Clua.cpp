@@ -37,6 +37,27 @@ int get_current_script_id(sol::this_state s)
 
 namespace ns_client
 {
+	// Define a container to store callback functions
+	std::unordered_map<std::string, sol::protected_function> event_callbacks;
+
+	void set_event_callback(sol::this_state s, std::string eventname, sol::protected_function func)
+	{
+		// Store the callback function in the container
+		event_callbacks[eventname] = func;
+	}
+
+	// Other functions...
+
+	// This function should be called from your event handling code to trigger callbacks
+	void trigger_event_callback(std::string eventname)
+	{
+		// Check if a callback is registered for the event
+		if (event_callbacks.find(eventname) != event_callbacks.end())
+		{
+			// Execute the callback function
+			event_callbacks[eventname]();
+		}
+	}
 	void add_callback(sol::this_state s, std::string eventname, sol::protected_function func)
 	{		
 		if (eventname != crypt_str("on_paint") && eventname != crypt_str("on_createmove") && eventname != crypt_str("on_shot"))
@@ -1294,6 +1315,7 @@ void c_lua::initialize()
 	);
 
 	auto client = lua.create_table();
+	client[crypt_str("set_event_callback")] = ns_client::set_event_callback;
 	client[crypt_str("add_callback")] = ns_client::add_callback;
 	client[crypt_str("load_script")] = ns_client::load_script;
 	client[crypt_str("unload_script")] = ns_client::unload_script;
