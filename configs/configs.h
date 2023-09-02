@@ -609,6 +609,7 @@ struct Config
 		Color bullet_tracer_color;
 		bool enemy_bullet_tracer;
 		Color enemy_bullet_tracer_color;
+		int bullet_tracer_type = 8;
 		bool preserve_killfeed;
 		std::vector <int> hitmarker;
 		bool hitmarker_test;

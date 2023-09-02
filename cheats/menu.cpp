@@ -1451,7 +1451,7 @@ void c_menu::render2(bool is_open)
 
 
 
-						ImGui::Checkbox(crypt_str("Client bullet impacts"), &g_cfg.esp.client_bullet_impacts);
+						ImGui::Checkbox(crypt_str("Client Impacts"), &g_cfg.esp.client_bullet_impacts);
 
 						if (g_cfg.esp.client_bullet_impacts)
 						{
@@ -1459,7 +1459,7 @@ void c_menu::render2(bool is_open)
 							ImGui::ColorEdit(crypt_str("##clientbulletimpacts"), &g_cfg.esp.client_bullet_impacts_color, ALPHA);
 						}
 
-						ImGui::Checkbox(crypt_str("Server bullet impacts"), &g_cfg.esp.server_bullet_impacts);
+						ImGui::Checkbox(crypt_str("Server Impacts"), &g_cfg.esp.server_bullet_impacts);
 
 						if (g_cfg.esp.server_bullet_impacts)
 						{
@@ -1470,14 +1470,14 @@ void c_menu::render2(bool is_open)
 						if (g_cfg.esp.client_bullet_impacts || g_cfg.esp.server_bullet_impacts)
 							ImGui::SliderFloat(crypt_str("Width"), &g_cfg.esp.bullet_impacts_width, 1, 20);
 
-						ImGui::Checkbox(crypt_str("Local bullet tracers"), &g_cfg.esp.bullet_tracer);
+						ImGui::Checkbox(crypt_str("Local Tracers"), &g_cfg.esp.bullet_tracer);
 						if (g_cfg.esp.bullet_tracer)
 						{
 							ImGui::SameLine();
 							ImGui::ColorEdit(crypt_str("##bulltracecolor"), &g_cfg.esp.bullet_tracer_color, ALPHA);
 						}
 
-						ImGui::Checkbox(crypt_str("Enemy bullet tracers"), &g_cfg.esp.enemy_bullet_tracer);
+						ImGui::Checkbox(crypt_str("Enemy Tracers"), &g_cfg.esp.enemy_bullet_tracer);
 
 						if (g_cfg.esp.enemy_bullet_tracer)
 						{

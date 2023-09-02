@@ -150,6 +150,7 @@ public:
 		} m_Peek;
 		
 		Vector eye_pos = ZERO;
+		Vector last_eye_pos = ZERO;
 		Vector start_position = ZERO;
 		Vector dormant_origin[65];
 
