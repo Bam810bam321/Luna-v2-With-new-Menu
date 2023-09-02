@@ -42,10 +42,10 @@ void resolver::reset()
 
 bool resolver::IsAdjustingBalance()
 {
-	for (int i = 0; i < 15; i++)
+	for (int i = 0; i < 13; i++)
 	{
 		const int activity = player->sequence_activity(player_record->layers[i].m_nSequence);
-		if (activity == 978)
+		if (activity == 979)
 		{
 			return true;
 		}
@@ -73,23 +73,44 @@ bool resolver::is_breaking_lby(AnimationLayer cur_layer, AnimationLayer prev_lay
 	return false;
 }
 
+static auto GetSmoothedVelocity = [](float min_delta, Vector a, Vector b) {
+	Vector delta = a - b;
+	float delta_length = delta.Length();
+
+	if (delta_length <= min_delta)
+	{
+		Vector result;
+
+		if (-min_delta <= delta_length)
+			return a;
+		else
+		{
+			float iradius = 1.0f / (delta_length + FLT_EPSILON);
+			return b - ((delta * iradius) * min_delta);
+		}
+	}
+	else
+	{
+		float iradius = 1.0f / (delta_length + FLT_EPSILON);
+		return b + ((delta * iradius) * min_delta);
+	}
+};
+
 bool resolver::is_slow_walking()
 {
 	auto entity = player;
-	float large = 0;
 	float velocity_2D[64], old_velocity_2D[64];
 	if (entity->m_vecVelocity().Length2D() != velocity_2D[entity->EntIndex()] && entity->m_vecVelocity().Length2D() != NULL) {
 		old_velocity_2D[entity->EntIndex()] = velocity_2D[entity->EntIndex()];
 		velocity_2D[entity->EntIndex()] = entity->m_vecVelocity().Length2D();
 	}
-	if (large == 0) return false;
+
 	Vector velocity = entity->m_vecVelocity();
 	Vector direction = entity->m_angEyeAngles();
 
 	float speed = velocity.Length();
 	direction.y = entity->m_angEyeAngles().y - direction.y;
 
-	// Method 1
 	if (velocity_2D[entity->EntIndex()] > 1) {
 		int tick_counter[64];
 		if (velocity_2D[entity->EntIndex()] == old_velocity_2D[entity->EntIndex()])
@@ -97,9 +118,10 @@ bool resolver::is_slow_walking()
 		else
 			tick_counter[entity->EntIndex()] = 0;
 
-		while (tick_counter[entity->EntIndex()] > (1 / m_globals()->m_intervalpertick) * fabsf(0.2f))
+		while (tick_counter[entity->EntIndex()] > (1 / m_globals()->m_intervalpertick) * fabsf(0.1f))
 			return true;
 	}
+
 
 	return false;
 }
@@ -114,28 +136,7 @@ int resolver::GetChokedPackets() {
 		return ticks;
 	}
 }
-//void resolver::layer_test()
-//{
-//	player_record->type = LAYERS;
-//
-//	float center = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[0][6].m_flPlaybackRate)) * 1000.f;
-//	float positive_full = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[1][6].m_flPlaybackRate)) * 1000.f;
-//	float negative_full = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[2][6].m_flPlaybackRate)) * 1000.f;
-//	float positive_40 = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[3][6].m_flPlaybackRate)) * 1000.f;
-//	float negative_40 = (abs(player_record->layers[6].m_flPlaybackRate - resolver_layers[4][6].m_flPlaybackRate)) * 1000.f;
-//
-//	if ((positive_full > center && negative_full <= center) || (positive_40 > center && negative_40 <= center))
-//		player_record->curSide = LEFT;
-//
-//
-//	else if ((negative_full > center && positive_full <= center) || (negative_40 > center && positive_40 <= center))
-//		player_record->curSide = RIGHT;
-//
-//	else
-//		get_side_trace();
-//
-//
-//}
+
 
 void resolver::get_side_trace()
 {
@@ -296,7 +297,7 @@ resolver_side resolver::FreeStand(player_t* e)
 
 inline float anglemod(float a)
 {
-	a = (280.f / 65536) * ((int)(a * (65536.f / 280.0f)) & 65535);
+	a = (360.f / 65536) * ((int)(a * (65536.f / 360.0f)) & 65535);
 	return a;
 }
 
@@ -325,33 +326,32 @@ float ApproachAngle(float target, float value, float speed)
 	return value;
 }
 
+struct ResolverResult {
+	float flMinBodyYaw;
+	float flMaxBodyYaw;
+	float flEyeYaw;
+	float m_flFakeGoalFeetYaw;
+	float speed;
+};
+
 float resolver::b_yaw(player_t* player, float angle, int n)
 {
 	auto animState = player->get_animation_state();
-
+	float m_flFakeGoalFeetYaw = 0.0f;
 	Vector velocity = player->m_vecVelocity();
 	float spd = velocity.LengthSqr();
 	if (spd > std::powf(1.2f * 260.0f, 2.f)) {
 		Vector velocity_normalized = velocity.Normalized();
 		velocity = velocity_normalized * (1.2f * 260.0f);
-
-
 	}
 
-	float resolveyaw = animState->m_flGoalFeetYaw;
-
-	auto delta_time
-		= fmaxf(m_globals()->m_curtime - animState->m_flLastClientSideAnimationUpdateTime, 1.f);
-
-	float deltatime = fabs(delta_time);
-	float stop_to_full_running_fraction = 1.f;
-	bool is_standing = true;
-	float v25 = std::clamp(player->m_flDuckAmount() + animState->m_fLandingDuckAdditiveSomething, 1.0f, 0.0f);
+	float m_flChokedTime = animState->m_flLastClientSideAnimationUpdateTime;
+	float v25 = math::clamp(player->m_flDuckAmount() + animState->m_fLandingDuckAdditiveSomething, 0.0f, 1.0f);
 	float v26 = animState->m_fDuckAmount;
-	float v27 = deltatime * 8.0f;
+	float v27 = m_flChokedTime * 6.0f;
 	float v28;
 
-	//Clamps
+	// clamp
 	if ((v25 - v26) <= v27) {
 		if (-v27 <= (v25 - v26))
 			v28 = v25;
@@ -362,91 +362,73 @@ float resolver::b_yaw(player_t* player, float angle, int n)
 		v28 = v26 + v27;
 	}
 
-	float flDuckAmount = std::clamp(v28, 1.0f, 0.0f);
+	float flDuckAmount = math::clamp(v28, 0.0f, 1.0f);
 
-	Vector animationVelocity = velocity;
+	Vector animationVelocity = GetSmoothedVelocity(m_flChokedTime * 2000.0f, velocity, player->m_vecVelocity());
 	float speed = std::fminf(animationVelocity.Length(), 260.0f);
 
-	auto weapon = player->m_hActiveWeapon().Get();
-
-	auto wpndata = weapon->get_csweapon_info();
+	auto weapon = player->m_hActiveWeapon();
 
 	float flMaxMovementSpeed = 260.0f;
-	if (weapon) {
-		flMaxMovementSpeed = std::fmaxf(wpndata->flMaxPlayerSpeed, 0.006f);
+	if (weapon && weapon->get_csweapon_info()) {
+		flMaxMovementSpeed = std::fmaxf(weapon->get_csweapon_info()->flMaxPlayerSpeed, 0.001f);
 	}
+
 	float flRunningSpeed = speed / (flMaxMovementSpeed * 0.520f);
-	float flDuckingSpeed_2 = speed / (flMaxMovementSpeed * 0.340f);
+	float flDuckingSpeed = speed / (flMaxMovementSpeed * 0.340f);
 
-	flRunningSpeed = std::clamp(flRunningSpeed, 0.0f, 1.0f);
+	flRunningSpeed = math::clamp(flRunningSpeed, 0.0f, 1.0f);
 
-	float flYawModifier = (((stop_to_full_running_fraction * -0.3f) - 0.2f) * flRunningSpeed) + 1.0f;
+	float flYawModifier = (((animState->m_flStopToFullRunningFraction * -0.3f) - 0.2f) * flRunningSpeed) + 1.0f;
 	if (flDuckAmount > 0.0f) {
-		float flDuckingSpeed = std::clamp(flDuckingSpeed_2, 0.0f, 1.0f);
+		float flDuckingSpeed = math::clamp(flDuckingSpeed, 0.0f, 1.0f);
 		flYawModifier += (flDuckAmount * flDuckingSpeed) * (0.5f - flYawModifier);
 	}
 
-	float flMaxBodyYaw = 58.f * flYawModifier;
-	float flMinBodyYaw = -58.f * flYawModifier;
+	auto test = animState->yaw_desync_adjustment();
 
+	float flMinBodyYaw = -58.0f * flYawModifier;
+	float flMaxBodyYaw = 58.0f * flYawModifier;
 
-	//float flMaxBodyYaw = (*(float*)(uintptr_t(animState) + 0x338) * flYawModifier);
-	//float flMinBodyYaw = (*(float*)(uintptr_t(animState) + 0x334) * flYawModifier);
-
-	float flEyeYaw = player->m_angEyeAngles().y;
-
-	float flEyeDiff = std::remainderf(flEyeYaw - resolveyaw, 360.f);
+	float flEyeYaw = angle;
+	float flEyeDiff = std::remainderf(flEyeYaw - m_flFakeGoalFeetYaw, 360.f);
 
 	if (flEyeDiff <= flMaxBodyYaw) {
 		if (flMinBodyYaw > flEyeDiff)
-			resolveyaw = fabs(flMinBodyYaw) + flEyeYaw;
+			m_flFakeGoalFeetYaw = fabs(flMinBodyYaw) + flEyeYaw;
 	}
 	else {
-		resolveyaw = flEyeYaw - fabs(flMaxBodyYaw);
+		m_flFakeGoalFeetYaw = flEyeYaw - fabs(flMaxBodyYaw);
 	}
+
+	m_flFakeGoalFeetYaw = std::remainderf(m_flFakeGoalFeetYaw, 360.f);
 
 	if (speed > 0.1f || fabs(velocity.z) > 100.0f) {
-		resolveyaw = ApproachAngle(
+		m_flFakeGoalFeetYaw = ApproachAngle(
 			flEyeYaw,
-			resolveyaw,
-			((stop_to_full_running_fraction * 20.0f) + 30.0f)
-			* deltatime);
+			m_flFakeGoalFeetYaw,
+			((animState->m_flStopToFullRunningFraction * 20.0f) + 30.0f)
+			* m_flChokedTime);
 	}
 	else {
-		resolveyaw = ApproachAngle(
+		m_flFakeGoalFeetYaw = ApproachAngle(
 			player->m_flLowerBodyYawTarget(),
-			resolveyaw,
-			deltatime * 100.0f);
+			m_flFakeGoalFeetYaw,
+			m_flChokedTime * 100.0f);
 	}
 
-	if (stop_to_full_running_fraction > 0.0 && stop_to_full_running_fraction < 1.0)
-	{
-		const auto interval = m_globals()->m_intervalpertick * 2.f;
+	float Left = flMinBodyYaw;
+	float Right = flMaxBodyYaw;
+	float middle = m_flFakeGoalFeetYaw;
 
-		if (is_standing)
-			stop_to_full_running_fraction = stop_to_full_running_fraction - interval;
-		else
-			stop_to_full_running_fraction = interval + stop_to_full_running_fraction;
+	math::normalize_yaw(m_flFakeGoalFeetYaw);
 
-		stop_to_full_running_fraction = std::clamp(stop_to_full_running_fraction, 0.f, 1.f);
-	}
-
-	if (speed > 135.2f && is_standing)
-	{
-		stop_to_full_running_fraction = fmaxf(stop_to_full_running_fraction, .0099999998f);
-		is_standing = false;
-	}
-
-	if (speed < 135.2f && !is_standing)
-	{
-		stop_to_full_running_fraction = fminf(stop_to_full_running_fraction, .99000001f);
-		is_standing = true;
-	}
-
-	//float Left = flEyeYaw + flMinBodyYaw;
-	//float Right = flEyeYaw + flMaxBodyYaw;
-	float gfy = resolveyaw;
-	//brute_yaw = std::remainderf(brute_yaw, 360.f);
+	ResolverResult result;
+	result.flMinBodyYaw = flMinBodyYaw;
+	result.flMaxBodyYaw = flMaxBodyYaw;
+	result.flEyeYaw = flEyeYaw;
+	result.m_flFakeGoalFeetYaw = m_flFakeGoalFeetYaw;
+	result.speed = speed;
 
 	if (n == 1)
 		return flMinBodyYaw;
@@ -454,11 +436,13 @@ float resolver::b_yaw(player_t* player, float angle, int n)
 		return flMaxBodyYaw;
 	else if (n == 3)
 		return flEyeYaw;
+	else if (n == 5)
+		return m_flFakeGoalFeetYaw;
 
 	if (n == 4)
 	{
 		return speed;
-	}// get player speed
+	} // get player speed
 }
 
 bool resolver::IsFakewalking(player_t* entity)
