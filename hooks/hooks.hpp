@@ -149,7 +149,7 @@ namespace hooks
 }
 extern IDirect3DTexture9* logotype;
 extern LRESULT ImGui_ImplDX9_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
+inline int m_RateStored;
 #pragma once
 static const unsigned int MyFont_compressed_size1 = 3238;
 static const unsigned int MyFont_compressed_data1[3240 / 4] =
