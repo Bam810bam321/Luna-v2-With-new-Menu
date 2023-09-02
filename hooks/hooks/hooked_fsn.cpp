@@ -157,6 +157,7 @@ void __stdcall hooks::hooked_fsn(ClientFrameStage_t stage)
 	if (g_ctx.globals.updating_skins && m_clientstate()->iDeltaTick > 0) 
 		g_ctx.globals.updating_skins = false;
 	CUserCmd* m_pcmd = nullptr;
+
 if (g_ctx.local()->is_alive())
 	{
 		m_RateStored = (int)std::round(1.f / m_globals()->m_intervalpertick);
