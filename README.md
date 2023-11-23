@@ -7,3 +7,6 @@ Credits:
 - Drip
 - V1per
 - NotRealWolf
+
+
+If you encounter any issues I personally will not help you fix since I don't touch CS:GO anymore (Signed Purlex)
